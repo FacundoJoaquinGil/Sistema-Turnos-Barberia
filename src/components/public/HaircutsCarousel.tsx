@@ -60,7 +60,7 @@ const HaircutsCarousel = () => {
   return (
     <section
       id="trabajos"
-      className="scroll-mt-24 overflow-hidden bg-zinc-950 py-20 text-white sm:py-24"
+      className="scroll-mt-24 overflow-hidden bg-[var(--color-primary)] py-20 text-white sm:py-24"
     >
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
         <div
@@ -83,7 +83,7 @@ const HaircutsCarousel = () => {
         </div>
 
         <div
-          className="mt-12 overflow-hidden rounded-[1.75rem] border border-white/10 bg-zinc-900 shadow-2xl shadow-black/20"
+          className="mt-12 overflow-hidden rounded-[1.75rem] border border-white/10 bg-[var(--color-primary)] shadow-2xl shadow-black/20"
           data-aos="fade-up"
           role="region"
           aria-roledescription="carrusel"

@@ -1,12 +1,25 @@
 import { Navigate, Route, Routes } from "react-router";
+
 import PublicLayout from "../layouts/PublicLayout";
-import ComingSoon from "../pages/public/ComingSoon";
-import Home from "../pages/public/Home";
-import Booking from "../pages/public/Booking";
+import AdminLayout from "../layouts/AdminLayout";
+
+import { Booking, ComingSoon, Home } from "../pages/public";
+
+import {
+  AdminAgenda,
+  AdminDashboard,
+  AdminLogin,
+  AdminPlaceholder,
+} from "../pages/admin";
+
+import ProtectedAdminRoute from "./ProtectedAdminRoute";
 
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* =========================
+          ÁREA PÚBLICA
+      ========================== */}
       <Route element={<PublicLayout />}>
         <Route index element={<Home />} />
 
@@ -21,16 +34,90 @@ const AppRoutes = () => {
 
         <Route path="reservar" element={<Booking />} />
 
-        <Route
-          path="login"
-          element={
-            <ComingSoon
-              title="Acceso del barbero"
-              description="El acceso privado será implementado posteriormente junto con el área administrativa."
-            />
-          }
-        />
+        {/* 
+          Conservamos /login para no romper
+          enlaces existentes del navbar.
+        */}
+        <Route path="login" element={<Navigate to="/admin/login" replace />} />
+      </Route>
 
+      {/* =========================
+          LOGIN ADMINISTRATIVO
+      ========================== */}
+      <Route path="/admin/login" element={<AdminLogin />} />
+
+      {/* =========================
+          ÁREA PRIVADA
+      ========================== */}
+      <Route element={<ProtectedAdminRoute />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          {/* Dashboard */}
+          <Route index element={<AdminDashboard />} />
+
+          {/* Agenda */}
+          <Route path="agenda" element={<AdminAgenda />} />
+
+          {/* Turnos */}
+          <Route
+            path="turnos"
+            element={
+              <AdminPlaceholder
+                title="Turnos"
+                description="Desde aquí podremos crear, confirmar, cancelar y consultar turnos."
+              />
+            }
+          />
+
+          {/* Clientes */}
+          <Route
+            path="clientes"
+            element={
+              <AdminPlaceholder
+                title="Clientes"
+                description="Aquí administraremos el historial y los datos de los clientes."
+              />
+            }
+          />
+
+          {/* Servicios */}
+          <Route
+            path="servicios"
+            element={
+              <AdminPlaceholder
+                title="Servicios"
+                description="Aquí configuraremos los servicios ofrecidos, sus precios y duración estimada."
+              />
+            }
+          />
+
+          {/* Disponibilidad */}
+          <Route
+            path="disponibilidad"
+            element={
+              <AdminPlaceholder
+                title="Disponibilidad"
+                description="Aquí definiremos los días y horarios disponibles para recibir reservas."
+              />
+            }
+          />
+
+          {/* Estadísticas */}
+          <Route
+            path="estadisticas"
+            element={
+              <AdminPlaceholder
+                title="Estadísticas"
+                description="Aquí analizaremos turnos, clientes e ingresos de la barbería."
+              />
+            }
+          />
+        </Route>
+      </Route>
+
+      {/* =========================
+          404
+      ========================== */}
+      <Route element={<PublicLayout />}>
         <Route
           path="*"
           element={

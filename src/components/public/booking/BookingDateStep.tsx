@@ -22,16 +22,16 @@ const BookingDateStep = ({
       <button
         type="button"
         onClick={onBack}
-        className="mb-5 text-sm font-semibold text-zinc-500 hover:text-zinc-950"
+        className="mb-5 text-sm font-semibold text-zinc-500 hover:text-[var(--color-text)]"
       >
         ← Cambiar servicio
       </button>
 
-      <h2 className="text-2xl font-black text-zinc-950">
+      <h2 className="text-2xl font-black text-[var(--color-text)]">
         Elegí una fecha
       </h2>
 
-      <p className="mt-2 text-sm leading-6 text-zinc-600">
+      <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
         Mostramos los próximos días
         disponibles.
       </p>
@@ -62,9 +62,9 @@ const BookingDateStep = ({
                 className={[
                   "min-h-28 rounded-2xl border p-4 text-center transition-all",
                   selected
-                    ? "border-zinc-950 bg-zinc-950 text-white"
+                    ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
                     : item.available
-                      ? "border-zinc-200 bg-white hover:border-zinc-400 hover:bg-zinc-50"
+                      ? "border-[var(--color-border)] bg-white hover:border-zinc-400 hover:bg-[var(--color-background)]"
                       : "cursor-not-allowed border-zinc-100 bg-zinc-100 text-zinc-400",
                 ].join(" ")}
               >

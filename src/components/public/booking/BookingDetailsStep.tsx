@@ -27,16 +27,16 @@ const BookingDetailsStep = ({
       <button
         type="button"
         onClick={onBack}
-        className="mb-5 text-sm font-semibold text-zinc-500 hover:text-zinc-950"
+        className="mb-5 text-sm font-semibold text-zinc-500 hover:text-[var(--color-text)]"
       >
         ← Cambiar horario
       </button>
 
-      <h2 className="text-2xl font-black text-zinc-950">
+      <h2 className="text-2xl font-black text-[var(--color-text)]">
         Tus datos
       </h2>
 
-      <p className="mt-2 text-sm leading-6 text-zinc-600">
+      <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
         No necesitás crear una cuenta
         para reservar.
       </p>
@@ -45,7 +45,7 @@ const BookingDetailsStep = ({
         <div>
           <label
             htmlFor="booking-name"
-            className="mb-2 block text-sm font-semibold text-zinc-800"
+            className="mb-2 block text-sm font-semibold text-[var(--color-secondary)]"
           >
             Nombre y apellido
           </label>
@@ -62,14 +62,14 @@ const BookingDetailsStep = ({
               })
             }
             placeholder="Ej: Juan Pérez"
-            className="min-h-13 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base text-zinc-950 outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-950/10"
+            className="min-h-13 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-zinc-950/10"
           />
         </div>
 
         <div>
           <label
             htmlFor="booking-phone"
-            className="mb-2 block text-sm font-semibold text-zinc-800"
+            className="mb-2 block text-sm font-semibold text-[var(--color-secondary)]"
           >
             Teléfono
           </label>
@@ -88,7 +88,7 @@ const BookingDetailsStep = ({
               })
             }
             placeholder="Ej: 381 555 1234"
-            className="min-h-13 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base text-zinc-950 outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-950/10"
+            className="min-h-13 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-zinc-950/10"
           />
 
           <p className="mt-2 text-xs text-zinc-500">
@@ -100,7 +100,7 @@ const BookingDetailsStep = ({
         <div>
           <label
             htmlFor="booking-comment"
-            className="mb-2 block text-sm font-semibold text-zinc-800"
+            className="mb-2 block text-sm font-semibold text-[var(--color-secondary)]"
           >
             Comentario{" "}
             <span className="font-normal text-zinc-400">
@@ -121,7 +121,7 @@ const BookingDetailsStep = ({
               })
             }
             placeholder="Ej: Quiero mantener un poco de largo arriba..."
-            className="w-full resize-none rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base text-zinc-950 outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-950/10"
+            className="w-full resize-none rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-zinc-950/10"
           />
 
           <p className="mt-2 text-right text-xs text-zinc-400">
@@ -134,7 +134,7 @@ const BookingDetailsStep = ({
         type="button"
         disabled={!formIsValid}
         onClick={onContinue}
-        className="mt-8 flex min-h-13 w-full items-center justify-center rounded-xl bg-zinc-950 px-6 py-3.5 font-semibold text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300"
+        className="mt-8 flex min-h-13 w-full items-center justify-center rounded-xl bg-[var(--color-primary)] px-6 py-3.5 font-semibold text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:bg-zinc-300"
       >
         Revisar turno
       </button>

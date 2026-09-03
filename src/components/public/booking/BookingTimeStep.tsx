@@ -22,16 +22,16 @@ const BookingTimeStep = ({
       <button
         type="button"
         onClick={onBack}
-        className="mb-5 text-sm font-semibold text-zinc-500 hover:text-zinc-950"
+        className="mb-5 text-sm font-semibold text-zinc-500 hover:text-[var(--color-text)]"
       >
         ← Cambiar fecha
       </button>
 
-      <h2 className="text-2xl font-black text-zinc-950">
+      <h2 className="text-2xl font-black text-[var(--color-text)]">
         Elegí un horario
       </h2>
 
-      <p className="mt-2 text-sm leading-6 text-zinc-600">
+      <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
         Los horarios ocupados aparecen
         deshabilitados.
       </p>
@@ -41,8 +41,8 @@ const BookingTimeStep = ({
           Consultando horarios...
         </div>
       ) : slots.length === 0 ? (
-        <div className="mt-7 rounded-2xl border border-zinc-200 bg-zinc-50 p-8 text-center">
-          <p className="font-semibold text-zinc-950">
+        <div className="mt-7 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-8 text-center">
+          <p className="font-semibold text-[var(--color-text)]">
             No hay horarios
             disponibles.
           </p>
@@ -74,9 +74,9 @@ const BookingTimeStep = ({
                 className={[
                   "min-h-12 rounded-xl border px-3 py-3 text-sm font-semibold transition-all",
                   selected
-                    ? "border-zinc-950 bg-zinc-950 text-white"
+                    ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
                     : slot.available
-                      ? "border-zinc-200 bg-white text-zinc-800 hover:border-zinc-400"
+                      ? "border-[var(--color-border)] bg-white text-[var(--color-secondary)] hover:border-zinc-400"
                       : "cursor-not-allowed border-zinc-100 bg-zinc-100 text-zinc-400 line-through",
                 ].join(" ")}
               >

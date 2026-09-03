@@ -28,11 +28,11 @@ const BookingServiceStep = ({
 
   return (
     <div>
-      <h2 className="text-2xl font-black text-zinc-950">
+      <h2 className="text-2xl font-black text-[var(--color-text)]">
         ¿Qué servicio querés?
       </h2>
 
-      <p className="mt-2 text-sm leading-6 text-zinc-600">
+      <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
         Elegí una opción para consultar
         los horarios disponibles.
       </p>
@@ -53,8 +53,8 @@ const BookingServiceStep = ({
               className={[
                 "rounded-2xl border p-5 text-left transition-all",
                 selected
-                  ? "border-zinc-950 bg-zinc-950 text-white shadow-lg"
-                  : "border-zinc-200 bg-white hover:border-zinc-400 hover:bg-zinc-50",
+                  ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white shadow-lg"
+                  : "border-[var(--color-border)] bg-white hover:border-zinc-400 hover:bg-[var(--color-background)]",
               ].join(" ")}
             >
               <div className="flex items-start justify-between gap-4">
@@ -86,7 +86,7 @@ const BookingServiceStep = ({
                   ].join(" ")}
                 >
                   {selected && (
-                    <span className="h-2 w-2 rounded-full bg-zinc-950" />
+                    <span className="h-2 w-2 rounded-full bg-[var(--color-primary)]" />
                   )}
                 </div>
               </div>
@@ -96,7 +96,7 @@ const BookingServiceStep = ({
                   "mt-5 flex items-center justify-between border-t pt-4",
                   selected
                     ? "border-white/10"
-                    : "border-zinc-200",
+                    : "border-[var(--color-border)]",
                 ].join(" ")}
               >
                 <span className="font-bold">

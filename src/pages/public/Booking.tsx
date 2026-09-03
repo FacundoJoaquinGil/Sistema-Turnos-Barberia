@@ -246,25 +246,25 @@ const Booking = () => {
     };
 
   return (
-    <section className="min-h-[calc(100svh-72px)] bg-zinc-50 py-10 sm:py-14 lg:py-16">
+    <section className="min-h-[calc(100svh-72px)] bg-[var(--color-background)] py-10 sm:py-14 lg:py-16">
       <div className="mx-auto max-w-5xl px-5 lg:px-8">
         <div className="mb-8 text-center">
-          <span className="inline-flex rounded-full border border-zinc-200 bg-white px-4 py-2 text-xs font-semibold tracking-[0.14em] text-zinc-600 uppercase shadow-sm">
+          <span className="inline-flex rounded-full border border-[var(--color-border)] bg-white px-4 py-2 text-xs font-semibold tracking-[0.14em] text-[var(--color-text-secondary)] uppercase shadow-sm">
             Reserva online
           </span>
 
-          <h1 className="mt-5 text-3xl font-black tracking-tight text-zinc-950 sm:text-4xl lg:text-5xl">
+          <h1 className="mt-5 text-3xl font-black tracking-tight text-[var(--color-text)] sm:text-4xl lg:text-5xl">
             Reservá tu próximo turno
           </h1>
 
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-zinc-600 sm:text-base">
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-[var(--color-text-secondary)] sm:text-base">
             Elegí tu servicio, fecha y
             horario. No necesitás crear
             una cuenta.
           </p>
         </div>
 
-        <div className="rounded-[1.75rem] border border-zinc-200 bg-white p-5 shadow-xl shadow-zinc-900/5 sm:p-7 lg:p-9">
+        <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-white p-5 shadow-xl shadow-zinc-900/5 sm:p-7 lg:p-9">
           <BookingProgress
             currentStep={step}
           />

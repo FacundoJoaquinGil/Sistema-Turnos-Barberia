@@ -61,7 +61,7 @@ const BookingProgress = ({
                   className={[
                     "flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors",
                     completed || active
-                      ? "bg-zinc-950 text-white"
+                      ? "bg-[var(--color-primary)] text-white"
                       : "bg-zinc-200 text-zinc-500",
                   ].join(" ")}
                 >
@@ -74,7 +74,7 @@ const BookingProgress = ({
                   className={[
                     "mt-2 text-xs font-medium",
                     active
-                      ? "text-zinc-950"
+                      ? "text-[var(--color-text)]"
                       : "text-zinc-500",
                   ].join(" ")}
                 >
@@ -89,7 +89,7 @@ const BookingProgress = ({
                     "mx-3 h-px flex-1",
                     index <
                     currentIndex
-                      ? "bg-zinc-950"
+                      ? "bg-[var(--color-primary)]"
                       : "bg-zinc-200",
                   ].join(" ")}
                 />

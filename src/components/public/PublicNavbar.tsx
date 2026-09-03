@@ -54,8 +54,8 @@ const PublicNavbar = () => {
     return [
       "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
       isActive
-        ? "bg-zinc-100 text-zinc-950"
-        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950",
+        ? "bg-zinc-100 text-[var(--color-text)]"
+        : "text-[var(--color-text-secondary)] hover:bg-zinc-100 hover:text-[var(--color-text)]",
     ].join(" ");
   };
 
@@ -65,13 +65,13 @@ const PublicNavbar = () => {
     return [
       "rounded-xl px-4 py-3.5 text-base font-medium transition-colors",
       isActive
-        ? "bg-zinc-100 text-zinc-950"
-        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950",
+        ? "bg-zinc-100 text-[var(--color-text)]"
+        : "text-[var(--color-text-secondary)] hover:bg-zinc-100 hover:text-[var(--color-text)]",
     ].join(" ");
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-[var(--color-border)]/80 bg-white/90 backdrop-blur-md">
       <nav
         className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 lg:px-8"
         aria-label="Navegación principal"
@@ -81,7 +81,7 @@ const PublicNavbar = () => {
           className="flex items-center gap-3"
           aria-label="Ir al inicio"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-950 text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -98,7 +98,7 @@ const PublicNavbar = () => {
           </div>
 
           <div>
-            <p className="text-sm font-black tracking-[0.16em] text-zinc-950 uppercase">
+            <p className="text-sm font-black tracking-[0.16em] text-[var(--color-text)] uppercase">
               Distrito
             </p>
 
@@ -123,14 +123,14 @@ const PublicNavbar = () => {
         <div className="hidden items-center gap-3 lg:flex">
           <Link
             to="/login"
-            className="px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-950"
+            className="px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:text-[var(--color-text)]"
           >
             Ingresar
           </Link>
 
           <Link
             to="/reservar"
-            className="rounded-xl bg-zinc-950 px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-zinc-800 active:scale-[0.98]"
+            className="rounded-xl bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-[var(--color-primary-hover)] active:scale-[0.98]"
           >
             Reservar turno
           </Link>
@@ -139,7 +139,7 @@ const PublicNavbar = () => {
         <button
           type="button"
           onClick={() => setMenuOpen((current) => !current)}
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 text-zinc-800 transition-colors hover:bg-zinc-100 lg:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-secondary)] transition-colors hover:bg-zinc-100 lg:hidden"
           aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
           aria-expanded={menuOpen}
         >
@@ -177,7 +177,7 @@ const PublicNavbar = () => {
 
       <div
         className={[
-          "overflow-hidden border-zinc-200 bg-white transition-all duration-300 lg:hidden",
+          "overflow-hidden border-[var(--color-border)] bg-white transition-all duration-300 lg:hidden",
           menuOpen
             ? "max-h-[500px] border-t opacity-100"
             : "max-h-0 border-t-0 opacity-0",
@@ -198,14 +198,14 @@ const PublicNavbar = () => {
 
           <Link
             to="/reservar"
-            className="flex min-h-12 items-center justify-center rounded-xl bg-zinc-950 px-5 py-3 font-semibold text-white transition-colors active:bg-zinc-800"
+            className="flex min-h-12 items-center justify-center rounded-xl bg-[var(--color-primary)] px-5 py-3 font-semibold text-white transition-colors active:bg-zinc-800"
           >
             Reservar turno
           </Link>
 
           <Link
             to="/login"
-            className="flex min-h-12 items-center justify-center rounded-xl px-5 py-3 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-950"
+            className="flex min-h-12 items-center justify-center rounded-xl px-5 py-3 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-[var(--color-text)]"
           >
             Acceso barbero
           </Link>

@@ -8,7 +8,7 @@ const ContactSection = () => {
       className="scroll-mt-24 bg-white py-20 sm:py-24"
     >
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
-        <div className="grid overflow-hidden rounded-[2rem] bg-zinc-950 text-white lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="grid overflow-hidden rounded-[2rem] bg-[var(--color-primary)] text-white lg:grid-cols-[0.9fr_1.1fr]">
           <div
             className="p-7 sm:p-10 lg:p-14"
             data-aos="fade-right"
@@ -149,7 +149,7 @@ const ContactSection = () => {
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/reservar"
-                className="flex min-h-13 items-center justify-center rounded-xl bg-white px-6 py-3.5 font-semibold text-zinc-950 transition-colors hover:bg-zinc-200"
+                className="flex min-h-13 items-center justify-center rounded-xl bg-white px-6 py-3.5 font-semibold text-[var(--color-text)] transition-colors hover:bg-zinc-200"
               >
                 Reservar mi turno
               </Link>
@@ -166,7 +166,7 @@ const ContactSection = () => {
           </div>
 
           <div
-            className="bg-zinc-900 p-7 sm:p-10 lg:p-14"
+            className="bg-[var(--color-primary)] p-7 sm:p-10 lg:p-14"
             data-aos="fade-left"
           >
             <p className="text-xs font-semibold tracking-[0.16em] text-zinc-500 uppercase">
@@ -195,7 +195,7 @@ const ContactSection = () => {
                       className={[
                         "text-sm font-semibold",
                         isClosed
-                          ? "text-zinc-600"
+                          ? "text-[var(--color-text-secondary)]"
                           : "text-white",
                       ].join(" ")}
                     >

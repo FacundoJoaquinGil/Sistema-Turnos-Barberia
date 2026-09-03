@@ -37,22 +37,22 @@ const HowToBookSection = () => {
   return (
     <section
       id="como-reservar"
-      className="scroll-mt-24 bg-zinc-50 py-20 sm:py-24"
+      className="scroll-mt-24 bg-[var(--color-background)] py-20 sm:py-24"
     >
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
         <div
           className="mx-auto max-w-2xl text-center"
           data-aos="fade-up"
         >
-          <span className="inline-flex rounded-full bg-white px-4 py-2 text-xs font-semibold tracking-[0.14em] text-zinc-600 uppercase shadow-sm ring-1 ring-zinc-200">
+          <span className="inline-flex rounded-full bg-white px-4 py-2 text-xs font-semibold tracking-[0.14em] text-[var(--color-text-secondary)] uppercase shadow-sm ring-1 ring-zinc-200">
             Cómo reservar
           </span>
 
-          <h2 className="mt-5 text-3xl font-black tracking-tight text-zinc-950 sm:text-4xl lg:text-5xl">
+          <h2 className="mt-5 text-3xl font-black tracking-tight text-[var(--color-text)] sm:text-4xl lg:text-5xl">
             Tu turno en pocos pasos
           </h2>
 
-          <p className="mt-5 text-base leading-7 text-zinc-600 sm:text-lg">
+          <p className="mt-5 text-base leading-7 text-[var(--color-text-secondary)] sm:text-lg">
             Reservar tu lugar va a llevarte solamente unos minutos.
             Sin llamadas y sin crear una cuenta.
           </p>
@@ -64,19 +64,19 @@ const HowToBookSection = () => {
           {bookingSteps.map((step, index) => (
             <article
               key={step.number}
-              className="relative rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-7"
+              className="relative rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-7"
               data-aos="fade-up"
               data-aos-delay={index * 80}
             >
-              <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-950 text-lg font-black text-white shadow-lg shadow-zinc-950/10">
+              <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-lg font-black text-white shadow-lg shadow-zinc-950/10">
                 {step.number}
               </div>
 
-              <h3 className="mt-6 text-xl font-bold text-zinc-950">
+              <h3 className="mt-6 text-xl font-bold text-[var(--color-text)]">
                 {step.title}
               </h3>
 
-              <p className="mt-3 text-sm leading-6 text-zinc-600">
+              <p className="mt-3 text-sm leading-6 text-[var(--color-text-secondary)]">
                 {step.description}
               </p>
             </article>
@@ -89,7 +89,7 @@ const HowToBookSection = () => {
         >
           <Link
             to="/reservar"
-            className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-zinc-950 px-7 py-4 font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-zinc-800 active:translate-y-0"
+            className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-7 py-4 font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--color-primary-hover)] active:translate-y-0"
           >
             Reservar ahora
 

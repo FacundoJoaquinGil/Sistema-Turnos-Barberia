@@ -3,7 +3,7 @@ import { barberShopMock } from "../../mocks/site.mock";
 
 const Hero = () => {
   return (
-    <section className="relative overflow-hidden bg-zinc-50">
+    <section className="relative overflow-hidden bg-[var(--color-background)]">
       <div className="pointer-events-none absolute -top-36 -left-36 h-80 w-80 rounded-full bg-amber-100/50 blur-3xl" />
 
       <div className="pointer-events-none absolute right-0 bottom-0 h-96 w-96 rounded-full bg-zinc-200/60 blur-3xl" />
@@ -14,24 +14,24 @@ const Hero = () => {
           data-aos="fade-up"
           data-aos-duration="650"
         >
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3.5 py-2 text-xs font-semibold tracking-wide text-zinc-600 shadow-sm">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3.5 py-2 text-xs font-semibold tracking-wide text-[var(--color-text-secondary)] shadow-sm">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
 
             Turnos disponibles
           </div>
 
-          <h1 className="max-w-2xl text-4xl leading-[1.05] font-black tracking-tight text-zinc-950 sm:text-5xl md:text-6xl lg:text-7xl">
+          <h1 className="max-w-2xl text-4xl leading-[1.05] font-black tracking-tight text-[var(--color-text)] sm:text-5xl md:text-6xl lg:text-7xl">
             {barberShopMock.slogan}
           </h1>
 
-          <p className="mt-6 max-w-xl text-base leading-7 text-zinc-600 sm:text-lg sm:leading-8">
+          <p className="mt-6 max-w-xl text-base leading-7 text-[var(--color-text-secondary)] sm:text-lg sm:leading-8">
             {barberShopMock.description}
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               to="/reservar"
-              className="group flex min-h-14 items-center justify-center gap-2 rounded-xl bg-zinc-950 px-7 py-4 text-base font-semibold text-white shadow-lg shadow-zinc-950/10 transition-all hover:-translate-y-0.5 hover:bg-zinc-800 hover:shadow-xl active:translate-y-0"
+              className="group flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-7 py-4 text-base font-semibold text-white shadow-lg shadow-zinc-950/10 transition-all hover:-translate-y-0.5 hover:bg-[var(--color-primary-hover)] hover:shadow-xl active:translate-y-0"
             >
               Reservar turno
 
@@ -53,15 +53,15 @@ const Hero = () => {
 
             <Link
               to="/trabajos"
-              className="flex min-h-14 items-center justify-center rounded-xl border border-zinc-300 bg-white px-7 py-4 text-base font-semibold text-zinc-800 transition-all hover:border-zinc-400 hover:bg-zinc-100"
+              className="flex min-h-14 items-center justify-center rounded-xl border border-zinc-300 bg-white px-7 py-4 text-base font-semibold text-[var(--color-secondary)] transition-all hover:border-zinc-400 hover:bg-zinc-100"
             >
               Ver trabajos
             </Link>
           </div>
 
-          <div className="mt-10 grid max-w-lg grid-cols-3 border-t border-zinc-200 pt-7">
+          <div className="mt-10 grid max-w-lg grid-cols-3 border-t border-[var(--color-border)] pt-7">
             <div>
-              <p className="text-lg font-bold text-zinc-950 sm:text-xl">
+              <p className="text-lg font-bold text-[var(--color-text)] sm:text-xl">
                 Fácil
               </p>
 
@@ -70,8 +70,8 @@ const Hero = () => {
               </p>
             </div>
 
-            <div className="border-x border-zinc-200 px-4">
-              <p className="text-lg font-bold text-zinc-950 sm:text-xl">
+            <div className="border-x border-[var(--color-border)] px-4">
+              <p className="text-lg font-bold text-[var(--color-text)] sm:text-xl">
                 Rápido
               </p>
 
@@ -81,7 +81,7 @@ const Hero = () => {
             </div>
 
             <div className="pl-4">
-              <p className="text-lg font-bold text-zinc-950 sm:text-xl">
+              <p className="text-lg font-bold text-[var(--color-text)] sm:text-xl">
                 Simple
               </p>
 
@@ -100,7 +100,7 @@ const Hero = () => {
           <div className="relative mx-auto max-w-md lg:max-w-none">
             <div className="absolute -top-4 -right-4 hidden h-full w-full rounded-[2rem] border border-zinc-300 lg:block" />
 
-            <div className="relative overflow-hidden rounded-[1.75rem] bg-zinc-900 shadow-2xl shadow-zinc-900/20">
+            <div className="relative overflow-hidden rounded-[1.75rem] bg-[var(--color-primary)] shadow-2xl shadow-zinc-900/20">
               <img
                 src={barberShopMock.heroImage}
                 alt="Barbero realizando un corte de cabello"
@@ -120,12 +120,12 @@ const Hero = () => {
               </div>
             </div>
 
-            <div className="absolute -bottom-5 -left-3 hidden rounded-2xl border border-zinc-200 bg-white p-4 shadow-xl sm:flex sm:items-center sm:gap-3 lg:-left-8">
+            <div className="absolute -bottom-5 -left-3 hidden rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-xl sm:flex sm:items-center sm:gap-3 lg:-left-8">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-100">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
-                  className="h-5 w-5 text-zinc-800"
+                  className="h-5 w-5 text-[var(--color-secondary)]"
                   aria-hidden="true"
                 >
                   <path
@@ -143,7 +143,7 @@ const Hero = () => {
                   Reservá cuando quieras
                 </p>
 
-                <p className="text-sm font-semibold text-zinc-900">
+                <p className="text-sm font-semibold text-[var(--color-text)]">
                   Turnos online 24/7
                 </p>
               </div>
