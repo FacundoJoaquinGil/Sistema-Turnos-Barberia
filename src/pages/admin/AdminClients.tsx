@@ -11,12 +11,12 @@ import {
   X,
 } from "lucide-react";
 
+import Swal from "sweetalert2";
+
 import {
   useMemo,
   useState,
 } from "react";
-
-import Swal from "sweetalert2";
 
 import ClientFormModal from "../../components/admin/clients/ClientFormModal";
 

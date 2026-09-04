@@ -6,6 +6,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
+
 import { FormEvent, useEffect, useState } from "react";
 
 import type {
@@ -35,7 +36,7 @@ interface ServiceMock {
   price: number;
 }
 
-const { clients } = useClients();
+
 
 const servicesMock: ServiceMock[] = [
   {
@@ -92,6 +93,8 @@ const AppointmentFormModal = ({
     getDefaultForm(initialDate),
   );
 
+  const { clients } = useClients();
+
   const isEditing = appointment !== null && appointment !== undefined;
 
   useEffect(() => {
@@ -100,10 +103,11 @@ const AppointmentFormModal = ({
     }
 
     if (appointment) {
-      const { date, time, client, phone, service, duration, price, status } =
+      const { clientId, date, time, client, phone, service, duration, price, status } =
         appointment;
 
       setForm({
+        clientId,
         date,
         time,
         client,

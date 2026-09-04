@@ -11,6 +11,7 @@ import {
   AdminLogin,
   AdminPlaceholder,
   AdminAppointments,
+  AdminClients,
 } from "../pages/admin";
 
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
@@ -18,8 +19,6 @@ import ProtectedAdminRoute from "./ProtectedAdminRoute";
 import { AppointmentsProvider } from "../context/AppointmentsContext";
 
 import { ClientsProvider } from "../context/ClientsContext";
-
-import AdminClients from "../pages/admin/AdminClients";
 
 const AppRoutes = () => {
   return (

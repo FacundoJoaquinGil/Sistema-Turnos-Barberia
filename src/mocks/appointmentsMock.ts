@@ -1,5 +1,7 @@
 import type { Appointment } from "../types/appointment";
 
+import { addDays } from "../utils/addDays";
+
 const today = new Date();
 
 const formatDateKey = (date: Date) => {

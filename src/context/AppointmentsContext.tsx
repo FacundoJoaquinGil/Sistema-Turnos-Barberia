@@ -16,19 +16,19 @@ import type {
 
 interface AppointmentsContextValue {
   appointments: Appointment[];
-
-  addAppointment: (
-    data: AppointmentFormData,
-  ) => void;
-
+  addAppointment: (data: AppointmentFormData) => void;
   updateAppointment: (
     id: number,
     data: AppointmentFormData,
   ) => void;
-
   updateAppointmentStatus: (
     id: number,
     status: AppointmentStatus,
+  ) => void;
+  updateAppointmentsClientSnapshot: (
+    clientId: Appointment["clientId"],
+    client: string,
+    phone: string,
   ) => void;
 }
 
@@ -95,18 +95,40 @@ export const AppointmentsProvider = ({
     );
   };
 
-  return (
-    <AppointmentsContext.Provider
-      value={{
-        appointments,
-        addAppointment,
-        updateAppointment,
-        updateAppointmentStatus,
-      }}
-    >
-      {children}
-    </AppointmentsContext.Provider>
+  const updateAppointmentsClientSnapshot = (
+  clientId: Appointment["clientId"],
+  client: string,
+  phone: string,
+) => {
+  // Evita modificar turnos que no tienen un cliente asociado.
+  if (clientId == null) return;
+
+  setAppointments((current) =>
+    current.map((appointment) =>
+      appointment.clientId === clientId
+        ? {
+            ...appointment,
+            client,
+            phone,
+          }
+        : appointment,
+    ),
   );
+};
+
+  return (
+  <AppointmentsContext.Provider
+    value={{
+      appointments,
+      addAppointment,
+      updateAppointment,
+      updateAppointmentStatus,
+      updateAppointmentsClientSnapshot,
+    }}
+  >
+    {children}
+  </AppointmentsContext.Provider>
+);
 };
 
 export const useAppointments = () => {

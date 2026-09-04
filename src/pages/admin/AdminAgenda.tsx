@@ -22,6 +22,8 @@ import type {
 
 import { useAppointments } from "../../context/AppointmentsContext";
 
+import { addDays } from "../../utils/addDays";
+
 const formatDateKey = (date: Date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -30,13 +32,6 @@ const formatDateKey = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const addDays = (date: Date, amount: number) => {
-  const newDate = new Date(date);
-
-  newDate.setDate(newDate.getDate() + amount);
-
-  return newDate;
-};
 
 const today = new Date();
 
