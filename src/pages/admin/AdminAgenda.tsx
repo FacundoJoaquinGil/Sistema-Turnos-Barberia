@@ -20,6 +20,8 @@ import type {
   AppointmentStatus,
 } from "../../types/appointment";
 
+import { useAppointments } from "../../context/AppointmentsContext";
+
 const formatDateKey = (date: Date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -37,75 +39,6 @@ const addDays = (date: Date, amount: number) => {
 };
 
 const today = new Date();
-
-const initialAppointments: Appointment[] = [
-  {
-    id: 1,
-    date: formatDateKey(today),
-    time: "09:00",
-    client: "Martín Pérez",
-    phone: "381 555-1201",
-    service: "Corte clásico",
-    duration: 45,
-    price: 9000,
-    status: "COMPLETADO",
-  },
-  {
-    id: 2,
-    date: formatDateKey(today),
-    time: "10:00",
-    client: "Lautaro Gómez",
-    phone: "381 555-1202",
-    service: "Corte + Barba",
-    duration: 60,
-    price: 13000,
-    status: "COMPLETADO",
-  },
-  {
-    id: 3,
-    date: formatDateKey(today),
-    time: "11:30",
-    client: "Nicolás Ruiz",
-    phone: "381 555-1203",
-    service: "Corte degradado",
-    duration: 45,
-    price: 10000,
-    status: "CONFIRMADO",
-  },
-  {
-    id: 4,
-    date: formatDateKey(today),
-    time: "13:00",
-    client: "Franco Díaz",
-    phone: "381 555-1204",
-    service: "Barba",
-    duration: 30,
-    price: 6000,
-    status: "PENDIENTE",
-  },
-  {
-    id: 5,
-    date: formatDateKey(today),
-    time: "15:00",
-    client: "Lucas Herrera",
-    phone: "381 555-1205",
-    service: "Corte clásico",
-    duration: 45,
-    price: 9000,
-    status: "CONFIRMADO",
-  },
-  {
-    id: 6,
-    date: formatDateKey(addDays(today, 1)),
-    time: "10:00",
-    client: "Agustín López",
-    phone: "381 555-1206",
-    service: "Corte + Barba",
-    duration: 60,
-    price: 13000,
-    status: "CONFIRMADO",
-  },
-];
 
 const statusLabel: Record<AppointmentStatus, string> = {
   PENDIENTE: "Pendiente",
@@ -126,7 +59,12 @@ const statusClasses: Record<AppointmentStatus, string> = {
 const AdminAgenda = () => {
   const [selectedDate, setSelectedDate] = useState(today);
 
-  const [appointments, setAppointments] = useState(initialAppointments);
+  const {
+  appointments,
+  addAppointment,
+  updateAppointment,
+  updateAppointmentStatus,
+} = useAppointments();
 
   const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
 
@@ -173,19 +111,6 @@ const AdminAgenda = () => {
 
   const goToToday = () => {
     setSelectedDate(new Date());
-  };
-
-  const updateAppointmentStatus = (id: number, status: AppointmentStatus) => {
-    setAppointments((current) =>
-      current.map((appointment) =>
-        appointment.id === id
-          ? {
-              ...appointment,
-              status,
-            }
-          : appointment,
-      ),
-    );
   };
 
   const handleViewDetails = (appointment: Appointment) => {
@@ -280,47 +205,37 @@ const AdminAgenda = () => {
     setAppointmentModalOpen(true);
   };
 
-  const handleSaveAppointment = (data: AppointmentFormData) => {
-    if (editingAppointment) {
-      setAppointments((current) =>
-        current.map((appointment) =>
-          appointment.id === editingAppointment.id
-            ? {
-                ...appointment,
-                ...data,
-              }
-            : appointment,
-        ),
-      );
+  const handleSaveAppointment = (
+  data: AppointmentFormData,
+) => {
+  if (editingAppointment) {
+    updateAppointment(
+      editingAppointment.id,
+      data,
+    );
 
-      Swal.fire({
-        icon: "success",
-        title: "Turno actualizado",
-        text: "Los cambios fueron guardados correctamente.",
-        timer: 1300,
-        showConfirmButton: false,
-      });
-    } else {
-      const newAppointment: Appointment = {
-        id: Date.now(),
-        ...data,
-      };
+    Swal.fire({
+      icon: "success",
+      title: "Turno actualizado",
+      text: "Los cambios fueron guardados correctamente.",
+      timer: 1300,
+      showConfirmButton: false,
+    });
+  } else {
+    addAppointment(data);
 
-      setAppointments((current) => [...current, newAppointment]);
+    Swal.fire({
+      icon: "success",
+      title: "Turno creado",
+      text: "El nuevo turno fue registrado correctamente.",
+      timer: 1300,
+      showConfirmButton: false,
+    });
+  }
 
-      Swal.fire({
-        icon: "success",
-        title: "Turno creado",
-        text: "El nuevo turno fue registrado correctamente.",
-        timer: 1300,
-        showConfirmButton: false,
-      });
-    }
-
-    setAppointmentModalOpen(false);
-
-    setEditingAppointment(null);
-  };
+  setAppointmentModalOpen(false);
+  setEditingAppointment(null);
+};
 
   const handleCloseAppointmentModal = () => {
     setAppointmentModalOpen(false);

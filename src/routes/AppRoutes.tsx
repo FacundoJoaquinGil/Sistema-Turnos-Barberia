@@ -10,9 +10,16 @@ import {
   AdminDashboard,
   AdminLogin,
   AdminPlaceholder,
+  AdminAppointments,
 } from "../pages/admin";
 
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
+
+import { AppointmentsProvider } from "../context/AppointmentsContext";
+
+import { ClientsProvider } from "../context/ClientsContext";
+
+import AdminClients from "../pages/admin/AdminClients";
 
 const AppRoutes = () => {
   return (
@@ -50,34 +57,28 @@ const AppRoutes = () => {
           ÁREA PRIVADA
       ========================== */}
       <Route element={<ProtectedAdminRoute />}>
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route
+          path="/admin"
+          element={
+            <AppointmentsProvider>
+              <ClientsProvider>
+                <AdminLayout />
+              </ClientsProvider>
+            </AppointmentsProvider>
+          }
+        >
           {/* Dashboard */}
+
           <Route index element={<AdminDashboard />} />
 
           {/* Agenda */}
           <Route path="agenda" element={<AdminAgenda />} />
 
           {/* Turnos */}
-          <Route
-            path="turnos"
-            element={
-              <AdminPlaceholder
-                title="Turnos"
-                description="Desde aquí podremos crear, confirmar, cancelar y consultar turnos."
-              />
-            }
-          />
+          <Route path="turnos" element={<AdminAppointments />} />
 
           {/* Clientes */}
-          <Route
-            path="clientes"
-            element={
-              <AdminPlaceholder
-                title="Clientes"
-                description="Aquí administraremos el historial y los datos de los clientes."
-              />
-            }
-          />
+          <Route path="clientes" element={<AdminClients />} />
 
           {/* Servicios */}
           <Route

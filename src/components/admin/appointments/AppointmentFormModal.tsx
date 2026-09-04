@@ -6,17 +6,15 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import {
-  FormEvent,
-  useEffect,
-  useState,
-} from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import type {
   Appointment,
   AppointmentFormData,
   AppointmentStatus,
 } from "../../../types/appointment";
+
+import { useClients } from "../../../context/ClientsContext";
 
 interface AppointmentFormModalProps {
   isOpen: boolean;
@@ -27,9 +25,7 @@ interface AppointmentFormModalProps {
 
   onClose: () => void;
 
-  onSubmit: (
-    data: AppointmentFormData,
-  ) => void;
+  onSubmit: (data: AppointmentFormData) => void;
 }
 
 interface ServiceMock {
@@ -38,6 +34,8 @@ interface ServiceMock {
   duration: number;
   price: number;
 }
+
+const { clients } = useClients();
 
 const servicesMock: ServiceMock[] = [
   {
@@ -66,44 +64,20 @@ const servicesMock: ServiceMock[] = [
   },
 ];
 
-const clientsMock = [
-  {
-    id: 1,
-    name: "Martín Pérez",
-    phone: "381 555-1201",
-  },
-  {
-    id: 2,
-    name: "Lautaro Gómez",
-    phone: "381 555-1202",
-  },
-  {
-    id: 3,
-    name: "Nicolás Ruiz",
-    phone: "381 555-1203",
-  },
-  {
-    id: 4,
-    name: "Franco Díaz",
-    phone: "381 555-1204",
-  },
-  {
-    id: 5,
-    name: "Lucas Herrera",
-    phone: "381 555-1205",
-  },
-];
+const getDefaultForm = (date: string): AppointmentFormData => ({
+  clientId: 0,
 
-const getDefaultForm = (
-  date: string,
-): AppointmentFormData => ({
   date,
   time: "",
+
   client: "",
   phone: "",
+
   service: "",
+
   duration: 0,
   price: 0,
+
   status: "PENDIENTE",
 });
 
@@ -114,14 +88,11 @@ const AppointmentFormModal = ({
   onClose,
   onSubmit,
 }: AppointmentFormModalProps) => {
-  const [form, setForm] =
-    useState<AppointmentFormData>(
-      getDefaultForm(initialDate),
-    );
+  const [form, setForm] = useState<AppointmentFormData>(
+    getDefaultForm(initialDate),
+  );
 
-  const isEditing =
-    appointment !== null &&
-    appointment !== undefined;
+  const isEditing = appointment !== null && appointment !== undefined;
 
   useEffect(() => {
     if (!isOpen) {
@@ -129,16 +100,8 @@ const AppointmentFormModal = ({
     }
 
     if (appointment) {
-      const {
-        date,
-        time,
-        client,
-        phone,
-        service,
-        duration,
-        price,
-        status,
-      } = appointment;
+      const { date, time, client, phone, service, duration, price, status } =
+        appointment;
 
       setForm({
         date,
@@ -154,67 +117,52 @@ const AppointmentFormModal = ({
       return;
     }
 
-    setForm(
-      getDefaultForm(initialDate),
-    );
-  }, [
-    isOpen,
-    appointment,
-    initialDate,
-  ]);
+    setForm(getDefaultForm(initialDate));
+  }, [isOpen, appointment, initialDate]);
 
   if (!isOpen) {
     return null;
   }
 
-  const handleClientChange = (
-    clientName: string,
-  ) => {
-    const client = clientsMock.find(
-      (item) =>
-        item.name === clientName,
-    );
+  const handleClientChange = (clientId: string) => {
+    const id = Number(clientId);
+
+    const client = clients.find((item) => item.id === id);
 
     setForm((current) => ({
       ...current,
-      client: clientName,
+
+      clientId: id,
+
+      client: client?.name ?? "",
+
       phone: client?.phone ?? "",
     }));
   };
 
-  const handleServiceChange = (
-    serviceName: string,
-  ) => {
-    const service =
-      servicesMock.find(
-        (item) =>
-          item.name === serviceName,
-      );
+  const handleServiceChange = (serviceName: string) => {
+    const service = servicesMock.find((item) => item.name === serviceName);
 
     setForm((current) => ({
       ...current,
       service: serviceName,
-      duration:
-        service?.duration ?? 0,
+      duration: service?.duration ?? 0,
       price: service?.price ?? 0,
     }));
   };
 
-  const handleStatusChange = (
-    status: AppointmentStatus,
-  ) => {
+  const handleStatusChange = (status: AppointmentStatus) => {
     setForm((current) => ({
       ...current,
       status,
     }));
   };
 
-  const handleSubmit = (
-    e: FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (
+      !form.clientId ||
       !form.client ||
       !form.service ||
       !form.date ||
@@ -244,9 +192,7 @@ const AppointmentFormModal = ({
             </p>
 
             <h2 className="mt-1 text-xl font-semibold text-[var(--color-text)] sm:text-2xl">
-              {isEditing
-                ? "Editar turno"
-                : "Nuevo turno"}
+              {isEditing ? "Editar turno" : "Nuevo turno"}
             </h2>
           </div>
 
@@ -259,10 +205,7 @@ const AppointmentFormModal = ({
           </button>
         </header>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-6 p-5 sm:p-6"
-        >
+        <form onSubmit={handleSubmit} className="space-y-6 p-5 sm:p-6">
           {/* CLIENTE */}
           <div>
             <label
@@ -280,29 +223,18 @@ const AppointmentFormModal = ({
 
               <select
                 id="appointment-client"
-                value={form.client}
-                onChange={(e) =>
-                  handleClientChange(
-                    e.target.value,
-                  )
-                }
+                value={form.clientId === 0 ? "" : form.clientId}
+                onChange={(e) => handleClientChange(e.target.value)}
                 required
                 className="h-12 w-full appearance-none rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] pl-12 pr-4 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)]"
               >
-                <option value="">
-                  Seleccionar cliente
-                </option>
+                <option value="">Seleccionar cliente</option>
 
-                {clientsMock.map(
-                  (client) => (
-                    <option
-                      key={client.id}
-                      value={client.name}
-                    >
-                      {client.name}
-                    </option>
-                  ),
-                )}
+                {clients.map((client) => (
+                  <option key={client.id} value={client.id}>
+                    {client.name}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -331,28 +263,17 @@ const AppointmentFormModal = ({
               <select
                 id="appointment-service"
                 value={form.service}
-                onChange={(e) =>
-                  handleServiceChange(
-                    e.target.value,
-                  )
-                }
+                onChange={(e) => handleServiceChange(e.target.value)}
                 required
                 className="h-12 w-full appearance-none rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] pl-12 pr-4 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)]"
               >
-                <option value="">
-                  Seleccionar servicio
-                </option>
+                <option value="">Seleccionar servicio</option>
 
-                {servicesMock.map(
-                  (service) => (
-                    <option
-                      key={service.id}
-                      value={service.name}
-                    >
-                      {service.name}
-                    </option>
-                  ),
-                )}
+                {servicesMock.map((service) => (
+                  <option key={service.id} value={service.name}>
+                    {service.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -378,13 +299,10 @@ const AppointmentFormModal = ({
                   type="date"
                   value={form.date}
                   onChange={(e) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        date: e.target
-                          .value,
-                      }),
-                    )
+                    setForm((current) => ({
+                      ...current,
+                      date: e.target.value,
+                    }))
                   }
                   required
                   className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] pl-12 pr-4 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
@@ -411,13 +329,10 @@ const AppointmentFormModal = ({
                   type="time"
                   value={form.time}
                   onChange={(e) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        time: e.target
-                          .value,
-                      }),
-                    )
+                    setForm((current) => ({
+                      ...current,
+                      time: e.target.value,
+                    }))
                   }
                   required
                   className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] pl-12 pr-4 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
@@ -448,16 +363,10 @@ const AppointmentFormModal = ({
                   min="0"
                   value={form.duration}
                   onChange={(e) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        duration:
-                          Number(
-                            e.target
-                              .value,
-                          ),
-                      }),
-                    )
+                    setForm((current) => ({
+                      ...current,
+                      duration: Number(e.target.value),
+                    }))
                   }
                   className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background)] pl-12 pr-14 text-sm text-[var(--color-text)] outline-none"
                 />
@@ -488,16 +397,10 @@ const AppointmentFormModal = ({
                   min="0"
                   value={form.price}
                   onChange={(e) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        price:
-                          Number(
-                            e.target
-                              .value,
-                          ),
-                      }),
-                    )
+                    setForm((current) => ({
+                      ...current,
+                      price: Number(e.target.value),
+                    }))
                   }
                   className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background)] pl-12 pr-4 text-sm text-[var(--color-text)] outline-none"
                 />
@@ -518,28 +421,17 @@ const AppointmentFormModal = ({
               id="appointment-status"
               value={form.status}
               onChange={(e) =>
-                handleStatusChange(
-                  e.target
-                    .value as AppointmentStatus,
-                )
+                handleStatusChange(e.target.value as AppointmentStatus)
               }
               className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] px-4 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
             >
-              <option value="PENDIENTE">
-                Pendiente
-              </option>
+              <option value="PENDIENTE">Pendiente</option>
 
-              <option value="CONFIRMADO">
-                Confirmado
-              </option>
+              <option value="CONFIRMADO">Confirmado</option>
 
-              <option value="COMPLETADO">
-                Completado
-              </option>
+              <option value="COMPLETADO">Completado</option>
 
-              <option value="CANCELADO">
-                Cancelado
-              </option>
+              <option value="CANCELADO">Cancelado</option>
             </select>
           </div>
 
@@ -557,10 +449,7 @@ const AppointmentFormModal = ({
                   </p>
 
                   <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
-                    {form.duration} min · $
-                    {form.price.toLocaleString(
-                      "es-AR",
-                    )}
+                    {form.duration} min · ${form.price.toLocaleString("es-AR")}
                   </p>
                 </div>
               </div>
@@ -581,9 +470,7 @@ const AppointmentFormModal = ({
               type="submit"
               className="rounded-xl bg-[var(--color-primary)] px-5 py-3 text-sm font-medium text-[var(--color-background-light)] transition hover:bg-[var(--color-primary-hover)]"
             >
-              {isEditing
-                ? "Guardar cambios"
-                : "Crear turno"}
+              {isEditing ? "Guardar cambios" : "Crear turno"}
             </button>
           </div>
         </form>
