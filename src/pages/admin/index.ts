@@ -4,3 +4,5 @@ export { default as AdminPlaceholder } from "./AdminPlaceholder";
 export { default as AdminAgenda } from "./AdminAgenda";
 export { default as AdminAppointments } from "./AdminAppointments";
 export { default as AdminClients } from "./AdminClients";
+export { default as AdminServices } from "./AdminServices";
+export { default as AdminAvailability } from "./AdminAvailability";

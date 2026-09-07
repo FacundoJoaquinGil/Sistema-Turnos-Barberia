@@ -14,12 +14,6 @@ const Hero = () => {
           data-aos="fade-up"
           data-aos-duration="650"
         >
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3.5 py-2 text-xs font-semibold tracking-wide text-[var(--color-text-secondary)] shadow-sm">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-
-            Turnos disponibles
-          </div>
-
           <h1 className="max-w-2xl text-4xl leading-[1.05] font-black tracking-tight text-[var(--color-text)] sm:text-5xl md:text-6xl lg:text-7xl">
             {barberShopMock.slogan}
           </h1>

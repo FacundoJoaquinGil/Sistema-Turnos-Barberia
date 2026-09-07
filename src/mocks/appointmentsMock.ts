@@ -19,6 +19,7 @@ export const appointmentsMock: Appointment[] = [
   {
     id: 1,
     clientId: 1,
+    serviceId: 1,
     date: formatDateKey(today),
     time: "09:00",
     client: "Martín Pérez",
@@ -31,6 +32,7 @@ export const appointmentsMock: Appointment[] = [
   {
     id: 2,
     clientId: 2,
+    serviceId: 2,
     date: formatDateKey(today),
     time: "10:00",
     client: "Lautaro Gómez",
@@ -43,6 +45,7 @@ export const appointmentsMock: Appointment[] = [
   {
     id: 3,
     clientId: 3,
+    serviceId: 3,
     date: formatDateKey(today),
     time: "11:30",
     client: "Nicolás Ruiz",
@@ -55,6 +58,7 @@ export const appointmentsMock: Appointment[] = [
   {
     id: 4,
     clientId: 4,
+    serviceId: 4,
     date: formatDateKey(today),
     time: "13:00",
     client: "Franco Díaz",
@@ -67,6 +71,7 @@ export const appointmentsMock: Appointment[] = [
   {
     id: 5,
     clientId: 5,
+    serviceId: 5,
     date: formatDateKey(today),
     time: "15:00",
     client: "Lucas Herrera",
@@ -79,6 +84,7 @@ export const appointmentsMock: Appointment[] = [
   {
     id: 6,
     clientId: 6,
+    serviceId: 6,
     date: formatDateKey(
       addDays(today, 1),
     ),
