@@ -16,6 +16,7 @@ import {
   AdminLogin,
   AdminPlaceholder,
   AdminServices,
+  AdminStatistics,
 } from "../pages/admin";
 
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
@@ -86,15 +87,7 @@ const AppRoutes = () => {
             <Route path="disponibilidad" element={<AdminAvailability />} />
 
             {/* Estadísticas */}
-            <Route
-              path="estadisticas"
-              element={
-                <AdminPlaceholder
-                  title="Estadísticas"
-                  description="Aquí analizaremos turnos, clientes e ingresos de la barbería."
-                />
-              }
-            />
+            <Route path="estadisticas" element={<AdminStatistics />}/>
           </Route>
         </Route>
 
