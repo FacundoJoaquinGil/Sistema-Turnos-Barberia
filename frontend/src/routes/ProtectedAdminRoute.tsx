@@ -1,12 +1,24 @@
-import {
-  Navigate,
-  Outlet,
-} from "react-router";
+import { Navigate, Outlet } from "react-router";
 
-import { isMockAdminAuthenticated } from "../lib/mockAuth";
+import { useAuth } from "../context";
 
 const ProtectedAdminRoute = () => {
-  if (!isMockAdminAuthenticated()) {
+  const {
+    user,
+    loading,
+  } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-background)]">
+        <p className="text-sm text-[var(--color-text-secondary)]">
+          Cargando...
+        </p>
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <Navigate
         to="/admin/login"

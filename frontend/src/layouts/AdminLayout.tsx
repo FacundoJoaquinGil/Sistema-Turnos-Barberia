@@ -1,74 +1,61 @@
-import {
-  Bell,
-  Menu,
-  UserRound,
-} from "lucide-react";
-import {
-  Outlet,
-  useLocation,
-  useNavigate,
-} from "react-router";
+import { Bell, Menu, UserRound } from "lucide-react";
+import { Outlet, useLocation, useNavigate } from "react-router";
 import { useState } from "react";
 import Swal from "sweetalert2";
 
 import AdminSidebar from "../components/admin/AdminSidebar";
 import { logoutMockAdmin } from "../lib/mockAuth";
+import { useAuth } from "../context";
 
-const pageTitles: Record<
-  string,
-  string
-> = {
+const pageTitles: Record<string, string> = {
   "/admin": "Dashboard",
   "/admin/agenda": "Agenda",
   "/admin/turnos": "Turnos",
   "/admin/clientes": "Clientes",
   "/admin/servicios": "Servicios",
-  "/admin/disponibilidad":
-    "Disponibilidad",
-  "/admin/estadisticas":
-    "Estadísticas",
+  "/admin/disponibilidad": "Disponibilidad",
+  "/admin/estadisticas": "Estadísticas",
 };
 
 const AdminLayout = () => {
-  const [sidebarOpen, setSidebarOpen] =
-    useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  const pageTitle =
-    pageTitles[location.pathname] ??
-    "Administración";
+  const pageTitle = pageTitles[location.pathname] ?? "Administración";
 
-  const handleLogout = async () => {
-    const result = await Swal.fire({
-      icon: "question",
-      title: "¿Cerrar sesión?",
-      text: "Vas a salir del panel administrativo.",
-      showCancelButton: true,
-      confirmButtonText: "Cerrar sesión",
-      cancelButtonText: "Cancelar",
-      confirmButtonColor: "#18181b",
-    });
+  const { signOut } = useAuth();
 
-    if (!result.isConfirmed) {
-      return;
-    }
+ const handleLogout = async () => {
+  const result = await Swal.fire({
+    title: "¿Cerrar sesión?",
+    text: "Tendrás que iniciar sesión nuevamente.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Cerrar sesión",
+    cancelButtonText: "Cancelar",
+  });
 
-    logoutMockAdmin();
+  if (!result.isConfirmed) {
+    return;
+  }
 
-    navigate("/admin/login", {
+  await signOut();
+
+  navigate(
+    "/admin/login",
+    {
       replace: true,
-    });
-  };
+    },
+  );
+};
 
   return (
     <div className="min-h-screen bg-zinc-100">
       <AdminSidebar
         isOpen={sidebarOpen}
-        onClose={() =>
-          setSidebarOpen(false)
-        }
+        onClose={() => setSidebarOpen(false)}
         onLogout={handleLogout}
       />
 
@@ -76,9 +63,7 @@ const AdminLayout = () => {
         <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-[var(--color-border)] bg-white/90 px-4 backdrop-blur sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
             <button
-              onClick={() =>
-                setSidebarOpen(true)
-              }
+              onClick={() => setSidebarOpen(true)}
               className="rounded-xl border border-[var(--color-border)] bg-white p-2.5 text-zinc-700 transition hover:bg-zinc-100 lg:hidden"
             >
               <Menu size={21} />
@@ -90,8 +75,7 @@ const AdminLayout = () => {
               </h1>
 
               <p className="hidden text-sm text-zinc-500 sm:block">
-                Gestioná tu barbería
-                desde un solo lugar.
+                Gestioná tu barbería desde un solo lugar.
               </p>
             </div>
           </div>
@@ -107,9 +91,7 @@ const AdminLayout = () => {
 
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary)] text-white">
-                <UserRound
-                  size={19}
-                />
+                <UserRound size={19} />
               </div>
 
               <div className="hidden sm:block">
@@ -117,9 +99,7 @@ const AdminLayout = () => {
                   Administrador
                 </p>
 
-                <p className="text-xs text-zinc-500">
-                  Barbero
-                </p>
+                <p className="text-xs text-zinc-500">Barbero</p>
               </div>
             </div>
           </div>

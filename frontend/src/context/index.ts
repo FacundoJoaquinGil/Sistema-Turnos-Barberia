@@ -17,3 +17,8 @@ export {
   AvailabilityProvider,
   useAvailability,
 } from "./AvailabilityContext";
+
+export {
+  AuthProvider,
+  useAuth,
+} from "./AuthContext";
