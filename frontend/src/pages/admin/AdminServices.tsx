@@ -18,7 +18,9 @@ import Swal from "sweetalert2";
 
 import ServiceFormModal from "../../components/admin/services/ServiceFormModal";
 
-import { useServices } from "../../context/ServicesContext";
+import {
+  useServices,
+} from "../../context/ServicesContext";
 
 import type {
   Service,
@@ -28,10 +30,11 @@ import type {
 const AdminServices = () => {
   const {
     services,
-    addService,
+    loading,
+    error,
+    createService,
     updateService,
     toggleServiceStatus,
-    isServiceNameInUse,
   } = useServices();
 
   const [search, setSearch] =
@@ -49,10 +52,27 @@ const AdminServices = () => {
     null,
   );
 
+  const [
+    savingService,
+    setSavingService,
+  ] = useState(false);
+
+  const [
+    togglingServiceId,
+    setTogglingServiceId,
+  ] = useState<number | null>(
+    null,
+  );
+
+  /*
+   * FILTRO DE SERVICIOS
+   */
   const filteredServices =
     useMemo(() => {
       const normalized =
-        search.trim().toLowerCase();
+        search
+          .trim()
+          .toLowerCase();
 
       if (!normalized) {
         return services;
@@ -62,17 +82,24 @@ const AdminServices = () => {
         (service) =>
           service.name
             .toLowerCase()
-            .includes(normalized) ||
+            .includes(
+              normalized,
+            ) ||
           service.description
-            .toLowerCase()
-            .includes(normalized),
+            ?.toLowerCase()
+            .includes(
+              normalized,
+            ),
       );
     }, [services, search]);
 
+  /*
+   * ESTADÍSTICAS
+   */
   const activeServices =
     services.filter(
       (service) =>
-        service.isActive,
+        service.active,
     ).length;
 
   const inactiveServices =
@@ -83,18 +110,29 @@ const AdminServices = () => {
     services.length > 0
       ? Math.round(
           services.reduce(
-            (total, service) =>
-              total + service.price,
+            (
+              total,
+              service,
+            ) =>
+              total +
+              service.price,
             0,
-          ) / services.length,
+          ) /
+            services.length,
         )
       : 0;
 
+  /*
+   * ABRIR MODAL PARA CREAR
+   */
   const handleNewService = () => {
     setEditingService(null);
     setServiceModalOpen(true);
   };
 
+  /*
+   * ABRIR MODAL PARA EDITAR
+   */
   const handleEditService = (
     service: Service,
   ) => {
@@ -102,93 +140,255 @@ const AdminServices = () => {
     setServiceModalOpen(true);
   };
 
+  /*
+   * CERRAR MODAL
+   */
   const handleCloseModal = () => {
+    if (savingService) {
+      return;
+    }
+
     setServiceModalOpen(false);
     setEditingService(null);
   };
 
-  const handleSaveService = async (
-    data: ServiceFormData,
+  /*
+   * VERIFICAR NOMBRE REPETIDO
+   *
+   * Excluimos el servicio que se está
+   * editando para permitir mantener
+   * su mismo nombre.
+   */
+  const isServiceNameInUse = (
+    name: string,
+    ignoredServiceId?: number,
   ) => {
-    if (
-      isServiceNameInUse(
-        data.name,
-        editingService?.id,
-      )
-    ) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Servicio existente",
-        text: "Ya existe un servicio con ese nombre.",
-        confirmButtonText:
-          "Entendido",
-        confirmButtonColor:
-          "var(--color-primary)",
-      });
+    const normalizedName =
+      name
+        .trim()
+        .toLowerCase();
 
-      return;
-    }
-
-    if (editingService) {
-      updateService(
-        editingService.id,
-        data,
-      );
-
-      await Swal.fire({
-        icon: "success",
-        title: "Servicio actualizado",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-    } else {
-      addService(data);
-
-      await Swal.fire({
-        icon: "success",
-        title: "Servicio creado",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-    }
-
-    handleCloseModal();
-  };
-
-  const handleToggleStatus = async (
-    service: Service,
-  ) => {
-    const action =
-      service.isActive
-        ? "desactivar"
-        : "activar";
-
-    const result = await Swal.fire({
-      icon: "question",
-      title: `${
-        service.isActive
-          ? "Desactivar"
-          : "Activar"
-      } servicio`,
-      text: `¿Querés ${action} "${service.name}"?`,
-      showCancelButton: true,
-      confirmButtonText:
-        service.isActive
-          ? "Desactivar"
-          : "Activar",
-      cancelButtonText: "Cancelar",
-      confirmButtonColor:
-        "var(--color-primary)",
-    });
-
-    if (!result.isConfirmed) {
-      return;
-    }
-
-    toggleServiceStatus(
-      service.id,
+    return services.some(
+      (service) =>
+        service.id !==
+          ignoredServiceId &&
+        service.name
+          .trim()
+          .toLowerCase() ===
+          normalizedName,
     );
   };
+
+  /*
+   * CREAR / EDITAR SERVICIO
+   */
+  const handleSaveService =
+    async (
+      data: ServiceFormData,
+    ) => {
+      if (
+        isServiceNameInUse(
+          data.name,
+          editingService?.id,
+        )
+      ) {
+        await Swal.fire({
+          icon: "warning",
+          title:
+            "Servicio existente",
+          text: "Ya existe un servicio con ese nombre.",
+          confirmButtonText:
+            "Entendido",
+          confirmButtonColor:
+            "var(--color-primary)",
+        });
+
+        return;
+      }
+
+      try {
+        setSavingService(true);
+
+        if (editingService) {
+          await updateService(
+            editingService.id,
+            data,
+          );
+
+          await Swal.fire({
+            icon: "success",
+            title:
+              "Servicio actualizado",
+            text: "Los cambios se guardaron correctamente.",
+            timer: 1400,
+            showConfirmButton:
+              false,
+          });
+        } else {
+          await createService(
+            data,
+          );
+
+          await Swal.fire({
+            icon: "success",
+            title:
+              "Servicio creado",
+            text: "El servicio se creó correctamente.",
+            timer: 1400,
+            showConfirmButton:
+              false,
+          });
+        }
+
+        setServiceModalOpen(
+          false,
+        );
+
+        setEditingService(
+          null,
+        );
+      } catch (error) {
+        console.error(
+          "Error al guardar servicio:",
+          error,
+        );
+
+        await Swal.fire({
+          icon: "error",
+          title:
+            "No se pudo guardar",
+          text: editingService
+            ? "Ocurrió un error al actualizar el servicio."
+            : "Ocurrió un error al crear el servicio.",
+          confirmButtonText:
+            "Entendido",
+          confirmButtonColor:
+            "var(--color-primary)",
+        });
+      } finally {
+        setSavingService(
+          false,
+        );
+      }
+    };
+
+  /*
+   * ACTIVAR / DESACTIVAR
+   */
+  const handleToggleStatus =
+    async (
+      service: Service,
+    ) => {
+      const action =
+        service.active
+          ? "desactivar"
+          : "activar";
+
+      const result =
+        await Swal.fire({
+          icon: "question",
+          title: `${
+            service.active
+              ? "Desactivar"
+              : "Activar"
+          } servicio`,
+          text: `¿Querés ${action} "${service.name}"?`,
+          showCancelButton:
+            true,
+          confirmButtonText:
+            service.active
+              ? "Desactivar"
+              : "Activar",
+          cancelButtonText:
+            "Cancelar",
+          confirmButtonColor:
+            "var(--color-primary)",
+        });
+
+      if (
+        !result.isConfirmed
+      ) {
+        return;
+      }
+
+      try {
+        setTogglingServiceId(
+          service.id,
+        );
+
+        await toggleServiceStatus(
+          service.id,
+        );
+
+        await Swal.fire({
+          icon: "success",
+          title: service.active
+            ? "Servicio desactivado"
+            : "Servicio activado",
+          timer: 1200,
+          showConfirmButton:
+            false,
+        });
+      } catch (error) {
+        console.error(
+          "Error al cambiar estado del servicio:",
+          error,
+        );
+
+        await Swal.fire({
+          icon: "error",
+          title:
+            "No se pudo cambiar el estado",
+          text: "Ocurrió un error. Intentá nuevamente.",
+          confirmButtonText:
+            "Entendido",
+          confirmButtonColor:
+            "var(--color-primary)",
+        });
+      } finally {
+        setTogglingServiceId(
+          null,
+        );
+      }
+    };
+
+  /*
+   * CARGANDO DATOS
+   */
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <p className="text-sm text-[var(--color-text-secondary)]">
+          Cargando servicios...
+        </p>
+      </div>
+    );
+  }
+
+  /*
+   * ERROR AL CARGAR
+   */
+  if (error) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-light)] p-6 text-center">
+          <Scissors
+            size={30}
+            className="mx-auto text-[var(--color-text-secondary)]"
+          />
+
+          <h3 className="mt-4 font-semibold">
+            No se pudieron cargar
+            los servicios
+          </h3>
+
+          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+            {error}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 text-[var(--color-text)]">
@@ -204,15 +404,18 @@ const AdminServices = () => {
           </h2>
 
           <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            Configurá los servicios,
-            precios y duración de cada
+            Configurá los
+            servicios, precios y
+            duración de cada
             atención.
           </p>
         </div>
 
         <button
           type="button"
-          onClick={handleNewService}
+          onClick={
+            handleNewService
+          }
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-3 text-sm font-medium text-[var(--color-background-light)] transition hover:bg-[var(--color-primary-hover)] sm:w-auto"
         >
           <Plus size={18} />
@@ -278,9 +481,10 @@ const AdminServices = () => {
           <input
             type="search"
             value={search}
-            onChange={(e) =>
+            onChange={(event) =>
               setSearch(
-                e.target.value,
+                event.target
+                  .value,
               )
             }
             placeholder="Buscar servicio..."
@@ -301,7 +505,9 @@ const AdminServices = () => {
         </div>
 
         <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
-          {filteredServices.length}{" "}
+          {
+            filteredServices.length
+          }{" "}
           {filteredServices.length ===
           1
             ? "servicio"
@@ -312,114 +518,147 @@ const AdminServices = () => {
       {/* LISTADO */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {filteredServices.map(
-          (service) => (
-            <article
-              key={service.id}
-              className={`rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-light)] p-5 transition ${
-                !service.isActive
-                  ? "opacity-60"
-                  : ""
-              }`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--color-background)] text-[var(--color-primary)]">
-                  <Scissors
-                    size={20}
-                  />
+          (service) => {
+            const isToggling =
+              togglingServiceId ===
+              service.id;
+
+            return (
+              <article
+                key={
+                  service.id
+                }
+                className={`rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-light)] p-5 transition ${
+                  !service.active
+                    ? "opacity-60"
+                    : ""
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--color-background)] text-[var(--color-primary)]">
+                    <Scissors
+                      size={20}
+                    />
+                  </div>
+
+                  <span
+                    className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                      service.active
+                        ? "border-[var(--color-primary)] text-[var(--color-primary)]"
+                        : "border-[var(--color-border)] text-[var(--color-text-secondary)]"
+                    }`}
+                  >
+                    {service.active
+                      ? "Activo"
+                      : "Inactivo"}
+                  </span>
                 </div>
 
-                <span
-                  className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-                    service.isActive
-                      ? "border-[var(--color-primary)] text-[var(--color-primary)]"
-                      : "border-[var(--color-border)] text-[var(--color-text-secondary)]"
-                  }`}
-                >
-                  {service.isActive
-                    ? "Activo"
-                    : "Inactivo"}
-                </span>
-              </div>
+                <h3 className="mt-5 text-lg font-semibold">
+                  {
+                    service.name
+                  }
+                </h3>
 
-              <h3 className="mt-5 text-lg font-semibold">
-                {service.name}
-              </h3>
+                <p className="mt-2 min-h-10 text-sm leading-5 text-[var(--color-text-secondary)]">
+                  {service.description ||
+                    "Sin descripción."}
+                </p>
 
-              <p className="mt-2 min-h-10 text-sm leading-5 text-[var(--color-text-secondary)]">
-                {service.description ||
-                  "Sin descripción."}
-              </p>
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-[var(--color-background)] p-3">
+                    <p className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]">
+                      <Clock3
+                        size={
+                          14
+                        }
+                      />
 
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-[var(--color-background)] p-3">
-                  <p className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]">
-                    <Clock3
-                      size={14}
+                      Duración
+                    </p>
+
+                    <p className="mt-2 font-semibold">
+                      {
+                        service.duration
+                      }{" "}
+                      min
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-[var(--color-background)] p-3">
+                    <p className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]">
+                      <DollarSign
+                        size={
+                          14
+                        }
+                      />
+
+                      Precio
+                    </p>
+
+                    <p className="mt-2 font-semibold">
+                      $
+                      {service.price.toLocaleString(
+                        "es-AR",
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex gap-2 border-t border-[var(--color-border)] pt-4">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleEditService(
+                        service,
+                      )
+                    }
+                    disabled={
+                      isToggling
+                    }
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-3 py-2.5 text-sm font-medium transition hover:bg-[var(--color-background)] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Pencil
+                      size={
+                        15
+                      }
                     />
 
-                    Duración
-                  </p>
+                    Editar
+                  </button>
 
-                  <p className="mt-2 font-semibold">
-                    {service.duration} min
-                  </p>
-                </div>
-
-                <div className="rounded-xl bg-[var(--color-background)] p-3">
-                  <p className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]">
-                    <DollarSign
-                      size={14}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void handleToggleStatus(
+                        service,
+                      )
+                    }
+                    disabled={
+                      isToggling
+                    }
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                      service.active
+                        ? "border border-[var(--color-secondary)] text-[var(--color-secondary)] hover:bg-[var(--color-background)]"
+                        : "bg-[var(--color-primary)] text-[var(--color-background-light)] hover:bg-[var(--color-primary-hover)]"
+                    }`}
+                  >
+                    <Power
+                      size={
+                        15
+                      }
                     />
 
-                    Precio
-                  </p>
-
-                  <p className="mt-2 font-semibold">
-                    $
-                    {service.price.toLocaleString(
-                      "es-AR",
-                    )}
-                  </p>
+                    {isToggling
+                      ? "Guardando..."
+                      : service.active
+                        ? "Desactivar"
+                        : "Activar"}
+                  </button>
                 </div>
-              </div>
-
-              <div className="mt-5 flex gap-2 border-t border-[var(--color-border)] pt-4">
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleEditService(
-                      service,
-                    )
-                  }
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-3 py-2.5 text-sm font-medium transition hover:bg-[var(--color-background)]"
-                >
-                  <Pencil size={15} />
-
-                  Editar
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleToggleStatus(
-                      service,
-                    )
-                  }
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-                    service.isActive
-                      ? "border border-[var(--color-secondary)] text-[var(--color-secondary)] hover:bg-[var(--color-background)]"
-                      : "bg-[var(--color-primary)] text-[var(--color-background-light)] hover:bg-[var(--color-primary-hover)]"
-                  }`}
-                >
-                  <Power size={15} />
-
-                  {service.isActive
-                    ? "Desactivar"
-                    : "Activar"}
-                </button>
-              </div>
-            </article>
-          ),
+              </article>
+            );
+          },
         )}
       </section>
 
@@ -432,20 +671,28 @@ const AdminServices = () => {
           />
 
           <h3 className="mt-4 font-semibold">
-            No encontramos servicios
+            No encontramos
+            servicios
           </h3>
 
           <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            Probá modificando la
-            búsqueda.
+            {search
+              ? "Probá modificando la búsqueda."
+              : "Todavía no hay servicios registrados."}
           </p>
         </section>
       )}
 
       <ServiceFormModal
-        isOpen={serviceModalOpen}
-        service={editingService}
-        onClose={handleCloseModal}
+        isOpen={
+          serviceModalOpen
+        }
+        service={
+          editingService
+        }
+        onClose={
+          handleCloseModal
+        }
         onSubmit={
           handleSaveService
         }

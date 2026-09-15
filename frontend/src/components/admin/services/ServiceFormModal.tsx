@@ -7,9 +7,9 @@ import {
 } from "lucide-react";
 
 import {
-  FormEvent,
   useEffect,
   useState,
+  type FormEvent,
 } from "react";
 
 import type {
@@ -26,7 +26,7 @@ interface ServiceFormModalProps {
 
   onSubmit: (
     data: ServiceFormData,
-  ) => void;
+  ) => Promise<void>;
 }
 
 const emptyForm: ServiceFormData = {
@@ -34,7 +34,6 @@ const emptyForm: ServiceFormData = {
   description: "",
   duration: 45,
   price: 0,
-  isActive: true,
 };
 
 const ServiceFormModal = ({
@@ -48,7 +47,13 @@ const ServiceFormModal = ({
       emptyForm,
     );
 
-  const isEditing = Boolean(service);
+  const [
+    submitting,
+    setSubmitting,
+  ] = useState(false);
+
+  const isEditing =
+    Boolean(service);
 
   useEffect(() => {
     if (!isOpen) {
@@ -59,29 +64,38 @@ const ServiceFormModal = ({
       setForm({
         name: service.name,
         description:
-          service.description,
-        duration: service.duration,
+          service.description ?? "",
+        duration:
+          service.duration,
         price: service.price,
-        isActive:
-          service.isActive,
       });
 
       return;
     }
 
-    setForm(emptyForm);
+    setForm({
+      ...emptyForm,
+    });
   }, [isOpen, service]);
 
   if (!isOpen) {
     return null;
   }
 
-  const handleSubmit = (
-    e: FormEvent<HTMLFormElement>,
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>,
   ) => {
-    e.preventDefault();
+    event.preventDefault();
 
-    const name = form.name.trim();
+    if (submitting) {
+      return;
+    }
+
+    const name =
+      form.name.trim();
+
+    const description =
+      form.description?.trim() ?? "";
 
     if (
       !name ||
@@ -91,12 +105,17 @@ const ServiceFormModal = ({
       return;
     }
 
-    onSubmit({
-      ...form,
-      name,
-      description:
-        form.description.trim(),
-    });
+    try {
+      setSubmitting(true);
+
+      await onSubmit({
+        ...form,
+        name,
+        description,
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -107,14 +126,20 @@ const ServiceFormModal = ({
           "color-mix(in srgb, var(--color-primary) 45%, transparent)",
       }}
     >
+      {/* OVERLAY */}
       <button
         type="button"
         aria-label="Cerrar"
-        onClick={onClose}
+        onClick={
+          submitting
+            ? undefined
+            : onClose
+        }
         className="absolute inset-0"
       />
 
       <section className="relative z-10 max-h-[92vh] w-full overflow-y-auto rounded-t-3xl border border-[var(--color-border)] bg-[var(--color-background-light)] sm:max-w-xl sm:rounded-3xl">
+        {/* HEADER */}
         <header className="flex items-start justify-between border-b border-[var(--color-border)] p-5 sm:p-6">
           <div>
             <p className="text-sm text-[var(--color-text-secondary)]">
@@ -131,7 +156,8 @@ const ServiceFormModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-text-secondary)] transition hover:bg-[var(--color-background)]"
+            disabled={submitting}
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-text-secondary)] transition hover:bg-[var(--color-background)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <X size={19} />
           </button>
@@ -160,15 +186,20 @@ const ServiceFormModal = ({
                 id="service-name"
                 type="text"
                 required
+                disabled={submitting}
                 value={form.name}
-                onChange={(e) =>
-                  setForm((current) => ({
-                    ...current,
-                    name: e.target.value,
-                  }))
+                onChange={(event) =>
+                  setForm(
+                    (current) => ({
+                      ...current,
+                      name:
+                        event.target
+                          .value,
+                    }),
+                  )
                 }
                 placeholder="Ej. Corte clásico"
-                className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] pl-12 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)]"
+                className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] pl-12 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
               />
             </div>
           </div>
@@ -191,18 +222,22 @@ const ServiceFormModal = ({
               <textarea
                 id="service-description"
                 rows={4}
+                disabled={submitting}
                 value={
-                  form.description
+                  form.description ?? ""
                 }
-                onChange={(e) =>
-                  setForm((current) => ({
-                    ...current,
-                    description:
-                      e.target.value,
-                  }))
+                onChange={(event) =>
+                  setForm(
+                    (current) => ({
+                      ...current,
+                      description:
+                        event.target
+                          .value,
+                    }),
+                  )
                 }
                 placeholder="Descripción breve del servicio..."
-                className="w-full resize-none rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] py-3 pl-12 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)]"
+                className="w-full resize-none rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] py-3 pl-12 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
               />
             </div>
           </div>
@@ -229,20 +264,26 @@ const ServiceFormModal = ({
                   min="5"
                   step="5"
                   required
-                  value={form.duration}
-                  onChange={(e) =>
+                  disabled={
+                    submitting
+                  }
+                  value={
+                    form.duration
+                  }
+                  onChange={(event) =>
                     setForm(
                       (current) => ({
                         ...current,
                         duration:
                           Number(
-                            e.target
+                            event
+                              .target
                               .value,
                           ),
                       }),
                     )
                   }
-                  className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] pl-12 pr-14 text-sm outline-none focus:border-[var(--color-primary)]"
+                  className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] pl-12 pr-14 text-sm outline-none focus:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
                 />
 
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[var(--color-text-secondary)]">
@@ -271,64 +312,29 @@ const ServiceFormModal = ({
                   min="0"
                   step="100"
                   required
-                  value={form.price}
-                  onChange={(e) =>
+                  disabled={
+                    submitting
+                  }
+                  value={
+                    form.price
+                  }
+                  onChange={(event) =>
                     setForm(
                       (current) => ({
                         ...current,
                         price:
                           Number(
-                            e.target
+                            event
+                              .target
                               .value,
                           ),
                       }),
                     )
                   }
-                  className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] pl-12 pr-4 text-sm outline-none focus:border-[var(--color-primary)]"
+                  className="h-12 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] pl-12 pr-4 text-sm outline-none focus:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </div>
             </div>
-          </div>
-
-          {/* ESTADO */}
-          <div className="flex items-center justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
-            <div>
-              <p className="text-sm font-medium">
-                Servicio activo
-              </p>
-
-              <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
-                Los servicios inactivos
-                no podrán seleccionarse
-                para nuevos turnos.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() =>
-                setForm(
-                  (current) => ({
-                    ...current,
-                    isActive:
-                      !current.isActive,
-                  }),
-                )
-              }
-              className={`relative h-7 w-12 rounded-full transition ${
-                form.isActive
-                  ? "bg-[var(--color-primary)]"
-                  : "bg-[var(--color-border)]"
-              }`}
-            >
-              <span
-                className={`absolute top-1 h-5 w-5 rounded-full bg-[var(--color-background-light)] transition-all ${
-                  form.isActive
-                    ? "left-6"
-                    : "left-1"
-                }`}
-              />
-            </button>
           </div>
 
           {/* BOTONES */}
@@ -336,18 +342,22 @@ const ServiceFormModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-[var(--color-border)] px-5 py-3 text-sm font-medium transition hover:bg-[var(--color-background)]"
+              disabled={submitting}
+              className="rounded-xl border border-[var(--color-border)] px-5 py-3 text-sm font-medium transition hover:bg-[var(--color-background)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancelar
             </button>
 
             <button
               type="submit"
-              className="rounded-xl bg-[var(--color-primary)] px-5 py-3 text-sm font-medium text-[var(--color-background-light)] transition hover:bg-[var(--color-primary-hover)]"
+              disabled={submitting}
+              className="rounded-xl bg-[var(--color-primary)] px-5 py-3 text-sm font-medium text-[var(--color-background-light)] transition hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isEditing
-                ? "Guardar cambios"
-                : "Crear servicio"}
+              {submitting
+                ? "Guardando..."
+                : isEditing
+                  ? "Guardar cambios"
+                  : "Crear servicio"}
             </button>
           </div>
         </form>

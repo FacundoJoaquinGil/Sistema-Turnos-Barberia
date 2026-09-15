@@ -1,18 +1,17 @@
 export interface Service {
   id: number;
   name: string;
-  description: string;
+  description: string | null;
   duration: number;
   price: number;
-  isActive: boolean;
+  active: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
-export type ServiceFormData = Pick<
-  Service,
-  | "name"
-  | "description"
-  | "duration"
-  | "price"
-  | "isActive"
->;
+export interface ServiceFormData {
+  name: string;
+  description?: string;
+  duration: number;
+  price: number;
+}

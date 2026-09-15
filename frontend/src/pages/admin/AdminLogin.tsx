@@ -29,8 +29,6 @@ const AdminLogin = () => {
   } = useAuth();
 
 
-console.log(user);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
