@@ -42,11 +42,11 @@ const formatDate = (
 
 const AdminClients = () => {
   const {
-    clients,
-    addClient,
-    updateClient,
-    isPhoneInUse,
-  } = useClients();
+  clients,
+  createClient,
+  updateClient,
+  isPhoneInUse,
+} = useClients();
 
   const {
     appointments,
@@ -144,36 +144,43 @@ const AdminClients = () => {
   };
 
   const handleSaveClient = async (
-    data: ClientFormData,
-  ) => {
-    if (
-      isPhoneInUse(
-        data.phone,
-        editingClient?.id,
-      )
-    ) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Teléfono registrado",
-        text: "Ya existe un cliente con ese número de teléfono.",
-        confirmButtonText: "Entendido",
-        confirmButtonColor:
-          "var(--color-primary)",
-      });
+  data: ClientFormData,
+) => {
+  if (
+    isPhoneInUse(
+      data.phone,
+      editingClient?.id,
+    )
+  ) {
+    await Swal.fire({
+      icon: "warning",
+      title: "Teléfono existente",
+      text: "Ya existe un cliente con ese teléfono.",
+      confirmButtonText: "Entendido",
+      confirmButtonColor:
+        "var(--color-primary)",
+    });
 
-      return;
-    }
+    return;
+  }
 
+  try {
     if (editingClient) {
-      updateClient(
-        editingClient.id,
-        data,
-      );
+      const updatedClient =
+        await updateClient(
+          editingClient.id,
+          data,
+        );
 
+      /*
+       * Mientras AppointmentsContext continúe
+       * trabajando con mocks, conservamos sus
+       * datos duplicados actualizados.
+       */
       updateAppointmentsClientSnapshot(
-        editingClient.id,
-        data.name,
-        data.phone,
+        updatedClient.id,
+        updatedClient.name,
+        updatedClient.phone,
       );
 
       await Swal.fire({
@@ -183,7 +190,7 @@ const AdminClients = () => {
         showConfirmButton: false,
       });
     } else {
-      addClient(data);
+      await createClient(data);
 
       await Swal.fire({
         icon: "success",
@@ -194,7 +201,20 @@ const AdminClients = () => {
     }
 
     handleCloseModal();
-  };
+  } catch (error) {
+    await Swal.fire({
+      icon: "error",
+      title: "No se pudo guardar",
+      text:
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un error inesperado.",
+      confirmButtonText: "Entendido",
+      confirmButtonColor:
+        "var(--color-primary)",
+    });
+  }
+};
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 text-[var(--color-text)]">

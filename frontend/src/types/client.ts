@@ -4,6 +4,7 @@ export interface Client {
   phone: string;
   notes: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export type ClientFormData = Pick<

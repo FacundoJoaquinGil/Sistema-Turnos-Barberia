@@ -200,36 +200,59 @@ const AdminAgenda = () => {
     setAppointmentModalOpen(true);
   };
 
-  const handleSaveAppointment = (
+const handleSaveAppointment = async (
   data: AppointmentFormData,
 ) => {
-  if (editingAppointment) {
-    updateAppointment(
-      editingAppointment.id,
-      data,
+  try {
+    if (editingAppointment) {
+      await updateAppointment(
+        editingAppointment.id,
+        data,
+      );
+
+      await Swal.fire({
+        icon: "success",
+        title: "Turno actualizado",
+        text: "Los cambios fueron guardados correctamente.",
+        timer: 1300,
+        showConfirmButton: false,
+      });
+    } else {
+      await addAppointment(data);
+
+      await Swal.fire({
+        icon: "success",
+        title: "Turno creado",
+        text: "El nuevo turno fue registrado correctamente.",
+        timer: 1300,
+        showConfirmButton: false,
+      });
+    }
+
+    /*
+     * El modal solamente se cierra cuando
+     * Supabase confirmó la operación.
+     */
+    setAppointmentModalOpen(false);
+    setEditingAppointment(null);
+  } catch (error) {
+    console.error(
+      "Error al guardar el turno:",
+      error,
     );
 
-    Swal.fire({
-      icon: "success",
-      title: "Turno actualizado",
-      text: "Los cambios fueron guardados correctamente.",
-      timer: 1300,
-      showConfirmButton: false,
-    });
-  } else {
-    addAppointment(data);
-
-    Swal.fire({
-      icon: "success",
-      title: "Turno creado",
-      text: "El nuevo turno fue registrado correctamente.",
-      timer: 1300,
-      showConfirmButton: false,
+    await Swal.fire({
+      icon: "error",
+      title: "No se pudo guardar el turno",
+      text:
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un error inesperado.",
+      confirmButtonText: "Entendido",
+      confirmButtonColor:
+        "var(--color-primary)",
     });
   }
-
-  setAppointmentModalOpen(false);
-  setEditingAppointment(null);
 };
 
   const handleCloseAppointmentModal = () => {

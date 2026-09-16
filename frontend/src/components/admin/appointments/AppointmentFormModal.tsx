@@ -41,7 +41,7 @@ interface AppointmentFormModalProps {
 
   onSubmit: (
     data: AppointmentFormData,
-  ) => void;
+  ) => Promise<void> | void;
 }
 
 const getDefaultForm = (
@@ -323,10 +323,10 @@ const AppointmentFormModal = ({
     }));
   };
 
-  const handleSubmit = (
-    e: FormEvent<HTMLFormElement>,
-  ) => {
-    e.preventDefault();
+const handleSubmit = async (
+  event: FormEvent<HTMLFormElement>,
+) => {
+  event.preventDefault();
 
     if (
       !form.clientId ||
@@ -339,7 +339,7 @@ const AppointmentFormModal = ({
       return;
     }
 
-    onSubmit(form);
+     await onSubmit(form);
   };
 
   return (
