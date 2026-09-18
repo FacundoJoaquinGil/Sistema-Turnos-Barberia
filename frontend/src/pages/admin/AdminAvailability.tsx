@@ -3,20 +3,21 @@ import {
   CalendarOff,
   Clock3,
   Plus,
+  RefreshCw,
   Trash2,
 } from "lucide-react";
-
 import { useState } from "react";
-
 import Swal from "sweetalert2";
 
 import { useAvailability } from "../../context/AvailabilityContext";
 
-import type { BlockedPeriodFormData } from "../../types/availability";
+import type {
+  BlockedPeriodFormData,
+  DayAvailability,
+  WeekDay,
+} from "../../types/availability";
 
-const formatDate = (
-  date: string,
-) => {
+const formatDate = (date: string) => {
   return new Date(
     `${date}T00:00:00`,
   ).toLocaleDateString("es-AR", {
@@ -33,24 +34,29 @@ const emptyBlockedPeriod: BlockedPeriodFormData = {
   reason: "",
 };
 
+type DayAvailabilityUpdate = Partial<
+  Omit<DayAvailability, "day" | "label">
+>;
+
 const AdminAvailability = () => {
   const {
     weeklySchedule,
     slotInterval,
     blockedDates,
     blockedPeriods,
+    loading,
+    error,
     updateDayAvailability,
     updateSlotInterval,
     blockDate,
     unblockDate,
     addBlockedPeriod,
     removeBlockedPeriod,
+    refreshAvailability,
   } = useAvailability();
 
-  const [
-    newBlockedDate,
-    setNewBlockedDate,
-  ] = useState("");
+  const [newBlockedDate, setNewBlockedDate] =
+    useState("");
 
   const [
     newBlockedPeriod,
@@ -59,8 +65,70 @@ const AdminAvailability = () => {
     emptyBlockedPeriod,
   );
 
+  const executeAvailabilityAction = async (
+    action: () => Promise<void>,
+    errorTitle: string,
+  ): Promise<boolean> => {
+    try {
+      await action();
+      return true;
+    } catch (actionError) {
+      console.error(
+        errorTitle,
+        actionError,
+      );
+
+      const message =
+        actionError instanceof Error
+          ? actionError.message
+          : "Ocurrió un error inesperado. Intentá nuevamente.";
+
+      await Swal.fire({
+        icon: "error",
+        title: errorTitle,
+        text: message,
+        confirmButtonText: "Entendido",
+        confirmButtonColor:
+          "var(--color-primary)",
+      });
+
+      return false;
+    }
+  };
+
+  const handleSlotIntervalChange = async (
+    interval: number,
+  ) => {
+    await executeAvailabilityAction(
+      () => updateSlotInterval(interval),
+      "No se pudo actualizar el intervalo",
+    );
+  };
+
+  const handleDayAvailabilityChange = async (
+    day: WeekDay,
+    data: DayAvailabilityUpdate,
+  ) => {
+    await executeAvailabilityAction(
+      () =>
+        updateDayAvailability(
+          day,
+          data,
+        ),
+      "No se pudo actualizar el horario",
+    );
+  };
+
   const handleBlockDate = async () => {
     if (!newBlockedDate) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Seleccioná una fecha",
+        text: "Debés elegir el día que querés bloquear.",
+        confirmButtonColor:
+          "var(--color-primary)",
+      });
+
       return;
     }
 
@@ -80,9 +148,40 @@ const AdminAvailability = () => {
       return;
     }
 
-    blockDate(newBlockedDate);
+    const success =
+      await executeAvailabilityAction(
+        () =>
+          blockDate(newBlockedDate),
+        "No se pudo bloquear la fecha",
+      );
 
-    setNewBlockedDate("");
+    if (success) {
+      setNewBlockedDate("");
+    }
+  };
+
+  const handleUnblockDate = async (
+    date: string,
+  ) => {
+    const result = await Swal.fire({
+      icon: "question",
+      title: "¿Desbloquear fecha?",
+      text: `${formatDate(date)} volverá a estar disponible.`,
+      showCancelButton: true,
+      confirmButtonText: "Desbloquear",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor:
+        "var(--color-primary)",
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    await executeAvailabilityAction(
+      () => unblockDate(date),
+      "No se pudo desbloquear la fecha",
+    );
   };
 
   const handleAddBlockedPeriod =
@@ -109,9 +208,7 @@ const AdminAvailability = () => {
         return;
       }
 
-      if (
-        startTime >= endTime
-      ) {
+      if (startTime >= endTime) {
         await Swal.fire({
           icon: "warning",
           title: "Horario inválido",
@@ -123,14 +220,68 @@ const AdminAvailability = () => {
         return;
       }
 
-      addBlockedPeriod(
-        newBlockedPeriod,
-      );
+      const success =
+        await executeAvailabilityAction(
+          () =>
+            addBlockedPeriod(
+              newBlockedPeriod,
+            ),
+          "No se pudo agregar el bloqueo",
+        );
 
-      setNewBlockedPeriod(
-        emptyBlockedPeriod,
+      if (success) {
+        setNewBlockedPeriod(
+          emptyBlockedPeriod,
+        );
+      }
+    };
+
+  const handleRemoveBlockedPeriod =
+    async (periodId: number) => {
+      const result = await Swal.fire({
+        icon: "question",
+        title: "¿Eliminar bloqueo?",
+        text: "Este horario volverá a estar disponible para recibir turnos.",
+        showCancelButton: true,
+        confirmButtonText: "Eliminar",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor:
+          "var(--color-primary)",
+      });
+
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      await executeAvailabilityAction(
+        () =>
+          removeBlockedPeriod(
+            periodId,
+          ),
+        "No se pudo eliminar el bloqueo",
       );
     };
+
+  const handleRefresh = async () => {
+    await executeAvailabilityAction(
+      refreshAvailability,
+      "No se pudo recargar la disponibilidad",
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-64 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-light)] p-6">
+        <div className="text-center">
+          <RefreshCw className="mx-auto animate-spin text-[var(--color-primary)]" />
+
+          <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
+            Cargando disponibilidad...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 text-[var(--color-text)]">
@@ -151,6 +302,33 @@ const AdminAvailability = () => {
         </p>
       </section>
 
+      {/* ERROR */}
+      {error && (
+        <section className="flex flex-col gap-3 rounded-2xl border border-[var(--color-secondary)] bg-[var(--color-background-light)] p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-medium text-[var(--color-secondary)]">
+              No se pudo cargar toda la
+              disponibilidad
+            </p>
+
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+              {error}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              void handleRefresh();
+            }}
+            className="flex h-10 items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-4 text-sm font-medium transition hover:bg-[var(--color-background)]"
+          >
+            <RefreshCw size={16} />
+            Reintentar
+          </button>
+        </section>
+      )}
+
       {/* INTERVALOS */}
       <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-light)] p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -167,13 +345,13 @@ const AdminAvailability = () => {
 
           <select
             value={slotInterval}
-            onChange={(e) =>
-              updateSlotInterval(
+            onChange={(event) => {
+              void handleSlotIntervalChange(
                 Number(
-                  e.target.value,
+                  event.target.value,
                 ),
-              )
-            }
+              );
+            }}
             className="h-11 rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] px-4 text-sm outline-none focus:border-[var(--color-primary)]"
           >
             <option value={15}>
@@ -228,15 +406,20 @@ const AdminAvailability = () => {
                         aria-pressed={
                           day.isOpen
                         }
-                        onClick={() =>
-                          updateDayAvailability(
+                        aria-label={
+                          day.isOpen
+                            ? `Cerrar ${day.label}`
+                            : `Abrir ${day.label}`
+                        }
+                        onClick={() => {
+                          void handleDayAvailabilityChange(
                             day.day,
                             {
                               isOpen:
                                 !day.isOpen,
                             },
-                          )
-                        }
+                          );
+                        }}
                         className={`relative h-7 w-12 shrink-0 rounded-full transition ${
                           day.isOpen
                             ? "bg-[var(--color-primary)]"
@@ -274,16 +457,19 @@ const AdminAvailability = () => {
                         value={
                           day.startTime
                         }
-                        onChange={(e) =>
-                          updateDayAvailability(
+                        onChange={(
+                          event,
+                        ) => {
+                          void handleDayAvailabilityChange(
                             day.day,
                             {
                               startTime:
-                                e.target
+                                event
+                                  .target
                                   .value,
                             },
-                          )
-                        }
+                          );
+                        }}
                         className="h-11 flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] px-3 text-sm outline-none disabled:opacity-40 sm:w-36 sm:flex-none"
                       />
 
@@ -299,16 +485,19 @@ const AdminAvailability = () => {
                         value={
                           day.endTime
                         }
-                        onChange={(e) =>
-                          updateDayAvailability(
+                        onChange={(
+                          event,
+                        ) => {
+                          void handleDayAvailabilityChange(
                             day.day,
                             {
                               endTime:
-                                e.target
+                                event
+                                  .target
                                   .value,
                             },
-                          )
-                        }
+                          );
+                        }}
                         className="h-11 flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] px-3 text-sm outline-none disabled:opacity-40 sm:w-36 sm:flex-none"
                       />
                     </div>
@@ -332,9 +521,7 @@ const AdminAvailability = () => {
       <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-light)] p-5 sm:p-6">
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--color-background)]">
-            <CalendarOff
-              size={20}
-            />
+            <CalendarOff size={20} />
           </div>
 
           <div>
@@ -354,9 +541,9 @@ const AdminAvailability = () => {
           <input
             type="date"
             value={newBlockedDate}
-            onChange={(e) =>
+            onChange={(event) =>
               setNewBlockedDate(
-                e.target.value,
+                event.target.value,
               )
             }
             className="h-11 flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-background-light)] px-4 text-sm outline-none focus:border-[var(--color-primary)]"
@@ -364,11 +551,12 @@ const AdminAvailability = () => {
 
           <button
             type="button"
-            onClick={handleBlockDate}
+            onClick={() => {
+              void handleBlockDate();
+            }}
             className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 text-sm font-medium text-[var(--color-background-light)] transition hover:bg-[var(--color-primary-hover)]"
           >
             <Plus size={17} />
-
             Bloquear día
           </button>
         </div>
@@ -393,16 +581,15 @@ const AdminAvailability = () => {
 
                   <button
                     type="button"
-                    onClick={() =>
-                      unblockDate(
+                    aria-label={`Desbloquear ${formatDate(date)}`}
+                    onClick={() => {
+                      void handleUnblockDate(
                         date,
-                      )
-                    }
+                      );
+                    }}
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-secondary)] transition hover:bg-[var(--color-background-light)]"
                   >
-                    <Trash2
-                      size={16}
-                    />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               ))}
@@ -434,11 +621,12 @@ const AdminAvailability = () => {
             value={
               newBlockedPeriod.date
             }
-            onChange={(e) =>
+            onChange={(event) =>
               setNewBlockedPeriod(
                 (current) => ({
                   ...current,
-                  date: e.target.value,
+                  date: event.target
+                    .value,
                 }),
               )
             }
@@ -450,12 +638,12 @@ const AdminAvailability = () => {
             value={
               newBlockedPeriod.startTime
             }
-            onChange={(e) =>
+            onChange={(event) =>
               setNewBlockedPeriod(
                 (current) => ({
                   ...current,
                   startTime:
-                    e.target.value,
+                    event.target.value,
                 }),
               )
             }
@@ -467,12 +655,12 @@ const AdminAvailability = () => {
             value={
               newBlockedPeriod.endTime
             }
-            onChange={(e) =>
+            onChange={(event) =>
               setNewBlockedPeriod(
                 (current) => ({
                   ...current,
                   endTime:
-                    e.target.value,
+                    event.target.value,
                 }),
               )
             }
@@ -481,13 +669,12 @@ const AdminAvailability = () => {
 
           <button
             type="button"
-            onClick={
-              handleAddBlockedPeriod
-            }
+            onClick={() => {
+              void handleAddBlockedPeriod();
+            }}
             className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 text-sm font-medium text-[var(--color-background-light)] transition hover:bg-[var(--color-primary-hover)]"
           >
             <Plus size={17} />
-
             Agregar
           </button>
         </div>
@@ -497,11 +684,12 @@ const AdminAvailability = () => {
           value={
             newBlockedPeriod.reason
           }
-          onChange={(e) =>
+          onChange={(event) =>
             setNewBlockedPeriod(
               (current) => ({
                 ...current,
-                reason: e.target.value,
+                reason:
+                  event.target.value,
               }),
             )
           }
@@ -525,41 +713,29 @@ const AdminAvailability = () => {
                     </p>
 
                     <p className="mt-1 flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-                      <Clock3
-                        size={14}
-                      />
+                      <Clock3 size={14} />
 
-                      {
-                        period.startTime
-                      }{" "}
-                      -{" "}
-                      {
-                        period.endTime
-                      }
+                      {period.startTime} -{" "}
+                      {period.endTime}
                     </p>
 
                     {period.reason && (
                       <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
-                        {
-                          period.reason
-                        }
+                        {period.reason}
                       </p>
                     )}
                   </div>
 
                   <button
                     type="button"
-                    onClick={() =>
-                      removeBlockedPeriod(
+                    onClick={() => {
+                      void handleRemoveBlockedPeriod(
                         period.id,
-                      )
-                    }
+                      );
+                    }}
                     className="flex h-9 items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] px-3 text-sm text-[var(--color-secondary)] transition hover:bg-[var(--color-background-light)]"
                   >
-                    <Trash2
-                      size={15}
-                    />
-
+                    <Trash2 size={15} />
                     Eliminar
                   </button>
                 </article>

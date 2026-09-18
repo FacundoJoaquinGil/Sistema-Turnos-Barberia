@@ -23,7 +23,19 @@ export interface BlockedPeriod {
   reason: string;
 }
 
-export type BlockedPeriodFormData = Omit<
-  BlockedPeriod,
-  "id"
->;
+export interface BlockedPeriodFormData {
+  date: string;
+  startTime: string;
+  endTime: string;
+  reason: string;
+}
+
+export type DayAvailabilityUpdate =
+  Partial<
+    Pick<
+      DayAvailability,
+      | "isOpen"
+      | "startTime"
+      | "endTime"
+    >
+  >;
