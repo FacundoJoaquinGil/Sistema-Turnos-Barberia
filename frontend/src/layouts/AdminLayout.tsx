@@ -4,7 +4,7 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 
 import AdminSidebar from "../components/admin/AdminSidebar";
-import { logoutMockAdmin } from "../lib/mockAuth";
+
 import { useAuth } from "../context";
 
 const pageTitles: Record<string, string> = {

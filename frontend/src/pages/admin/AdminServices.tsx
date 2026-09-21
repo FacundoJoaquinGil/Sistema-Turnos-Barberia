@@ -99,7 +99,7 @@ const AdminServices = () => {
   const activeServices =
     services.filter(
       (service) =>
-        service.active,
+        service.isActive,
     ).length;
 
   const inactiveServices =
@@ -280,7 +280,7 @@ const AdminServices = () => {
       service: Service,
     ) => {
       const action =
-        service.active
+        service.isActive
           ? "desactivar"
           : "activar";
 
@@ -288,7 +288,7 @@ const AdminServices = () => {
         await Swal.fire({
           icon: "question",
           title: `${
-            service.active
+            service.isActive
               ? "Desactivar"
               : "Activar"
           } servicio`,
@@ -296,7 +296,7 @@ const AdminServices = () => {
           showCancelButton:
             true,
           confirmButtonText:
-            service.active
+            service.isActive
               ? "Desactivar"
               : "Activar",
           cancelButtonText:
@@ -322,7 +322,7 @@ const AdminServices = () => {
 
         await Swal.fire({
           icon: "success",
-          title: service.active
+          title: service.isActive
             ? "Servicio desactivado"
             : "Servicio activado",
           timer: 1200,
@@ -529,7 +529,7 @@ const AdminServices = () => {
                   service.id
                 }
                 className={`rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-light)] p-5 transition ${
-                  !service.active
+                  !service.isActive
                     ? "opacity-60"
                     : ""
                 }`}
@@ -543,12 +543,12 @@ const AdminServices = () => {
 
                   <span
                     className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-                      service.active
+                      service.isActive
                         ? "border-[var(--color-primary)] text-[var(--color-primary)]"
                         : "border-[var(--color-border)] text-[var(--color-text-secondary)]"
                     }`}
                   >
-                    {service.active
+                    {service.isActive
                       ? "Activo"
                       : "Inactivo"}
                   </span>
@@ -638,7 +638,7 @@ const AdminServices = () => {
                       isToggling
                     }
                     className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                      service.active
+                      service.isActive
                         ? "border border-[var(--color-secondary)] text-[var(--color-secondary)] hover:bg-[var(--color-background)]"
                         : "bg-[var(--color-primary)] text-[var(--color-background-light)] hover:bg-[var(--color-primary-hover)]"
                     }`}
@@ -651,7 +651,7 @@ const AdminServices = () => {
 
                     {isToggling
                       ? "Guardando..."
-                      : service.active
+                      : service.isActive
                         ? "Desactivar"
                         : "Activar"}
                   </button>

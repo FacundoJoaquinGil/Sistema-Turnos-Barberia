@@ -1,288 +1,219 @@
-import { weeklyAvailabilityMock } from "../mocks/availability.mock";
-import { servicesMock } from "../mocks/services.mock";
+import { supabase } from "../lib/supabase";
 
-import type {
-  AvailableBookingDate,
-  CreateAppointmentInput,
-  CreatedAppointment,
-  TimeSlot,
-} from "../types/booking.types";
+import type { AppointmentStatus } from "../types/appointment";
 
-import type { BarberService } from "../types/public.types";
+/*
+ * ============================================================
+ * TIPOS
+ * ============================================================
+ */
 
-const MOCK_DELAY = 350;
+/*
+ * Este es el único dato de un turno que la página pública
+ * necesita conocer.
+ *
+ * No exponemos:
+ *
+ * - clientId
+ * - client
+ * - phone
+ * - serviceId
+ * - service
+ * - price
+ *
+ * Booking solamente necesita saber qué espacio horario
+ * ya se encuentra ocupado.
+ */
+export type PublicBusyAppointment = {
+  date: string;
 
-const wait = (milliseconds: number) =>
-  new Promise<void>((resolve) => {
-    window.setTimeout(resolve, milliseconds);
-  });
+  time: string;
 
-const formatDateToISO = (
-  date: Date,
-): string => {
-  const year = date.getFullYear();
+  duration: number;
 
-  const month = String(
-    date.getMonth() + 1,
-  ).padStart(2, "0");
-
-  const day = String(
-    date.getDate(),
-  ).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+  status: AppointmentStatus;
 };
 
-const timeToMinutes = (
-  time: string,
-): number => {
-  const [hours, minutes] = time
-    .split(":")
-    .map(Number);
+/*
+ * Forma exacta devuelta por:
+ *
+ * get_public_busy_appointments()
+ *
+ * Estos nombres deben coincidir con los definidos
+ * en RETURNS TABLE de la función PostgreSQL.
+ */
+type BusyAppointmentRow = {
+  appointment_date: string;
 
-  return hours * 60 + minutes;
+  appointment_time: string;
+
+  appointment_duration: number;
+
+  appointment_status: string;
 };
 
-const minutesToTime = (
-  minutes: number,
-): string => {
-  const hours = Math.floor(minutes / 60);
+export type CreatePublicBookingInput = {
+  name: string;
 
-  const remainingMinutes =
-    minutes % 60;
+  phone: string;
 
-  return `${String(hours).padStart(
-    2,
-    "0",
-  )}:${String(remainingMinutes).padStart(
-    2,
-    "0",
-  )}`;
+  comment: string;
+
+  serviceId: number;
+
+  date: string;
+
+  time: string;
 };
 
-const getMockOccupiedTimes = (
-  date: string,
-): string[] => {
-  const parsedDate = new Date(
-    `${date}T00:00:00`,
-  );
+/*
+ * ============================================================
+ * TURNOS OCUPADOS
+ * ============================================================
+ */
 
-  const day = parsedDate.getDate();
-
-  if (day % 3 === 0) {
-    return [
-      "09:30",
-      "11:00",
-      "15:30",
-      "17:00",
-    ];
-  }
-
-  if (day % 3 === 1) {
-    return [
-      "10:00",
-      "12:30",
-      "16:00",
-      "18:00",
-    ];
-  }
-
-  return [
-    "09:00",
-    "13:00",
-    "17:30",
-  ];
-};
-
-const isPastTime = (
-  date: string,
-  time: string,
-): boolean => {
-  const today = new Date();
-
-  if (
-    formatDateToISO(today) !== date
-  ) {
-    return false;
-  }
-
-  const currentMinutes =
-    today.getHours() * 60 +
-    today.getMinutes();
-
-  return (
-    timeToMinutes(time) <=
-    currentMinutes
-  );
-};
-
-export const getBookableServices =
-  async (): Promise<BarberService[]> => {
-    await wait(MOCK_DELAY);
-
-    return servicesMock.filter(
-      (service) => service.active,
-    );
-  };
-
-export const getAvailableBookingDates =
-  async (): Promise<
-    AvailableBookingDate[]
-  > => {
-    await wait(MOCK_DELAY);
-
-    const dates: AvailableBookingDate[] =
-      [];
-
-    const today = new Date();
-
-    for (
-      let offset = 0;
-      offset < 14;
-      offset += 1
-    ) {
-      const currentDate = new Date(today);
-
-      currentDate.setDate(
-        today.getDate() + offset,
-      );
-
-      const weekday =
-        currentDate.getDay();
-
-      const isWorkingDay =
-        weeklyAvailabilityMock[
-          weekday
-        ] !== null;
-
-      /*
-       * Simulamos una fecha bloqueada por el barbero.
-       * Después esto vendrá de blocked_dates.
-       */
-      const isMockBlockedDate =
-        offset === 7;
-
-      const available =
-        isWorkingDay &&
-        !isMockBlockedDate;
-
-      dates.push({
-        date: formatDateToISO(
-          currentDate,
-        ),
-
-        weekday:
-          new Intl.DateTimeFormat(
-            "es-AR",
-            {
-              weekday: "short",
-            },
-          ).format(currentDate),
-
-        dayNumber: String(
-          currentDate.getDate(),
-        ),
-
-        month:
-          new Intl.DateTimeFormat(
-            "es-AR",
-            {
-              month: "short",
-            },
-          ).format(currentDate),
-
-        available,
-
-        reason: !isWorkingDay
-          ? "Cerrado"
-          : isMockBlockedDate
-            ? "No disponible"
-            : undefined,
-      });
-    }
-
-    return dates;
-  };
-
-export const getAvailableTimeSlots =
+/*
+ * Obtiene únicamente los turnos necesarios para calcular
+ * disponibilidad pública.
+ *
+ * No consulta directamente appointments porque esa tabla
+ * contiene información privada de clientes.
+ */
+export const getPublicBusyAppointments =
   async (
-    date: string,
-    serviceDurationMinutes: number,
-  ): Promise<TimeSlot[]> => {
-    await wait(MOCK_DELAY);
+    startDate: string,
+    endDate: string,
+  ): Promise<PublicBusyAppointment[]> => {
+    const { data, error } =
+      await supabase.rpc(
+        "get_public_busy_appointments",
+        {
+          p_start_date: startDate,
 
-    const parsedDate = new Date(
-      `${date}T00:00:00`,
-    );
+          p_end_date: endDate,
+        },
+      );
 
-    const weekday =
-      parsedDate.getDay();
-
-    const workingHours =
-      weeklyAvailabilityMock[weekday];
-
-    if (!workingHours) {
-      return [];
+    if (error) {
+      throw new Error(
+        error.message,
+      );
     }
 
-    const startMinutes =
-      timeToMinutes(
-        workingHours.start,
-      );
+    const rows =
+      (data ??
+        []) as BusyAppointmentRow[];
 
-    const endMinutes =
-      timeToMinutes(
-        workingHours.end,
-      );
+    return rows.map(
+      (row) => ({
+        date:
+          row.appointment_date,
 
-    const occupiedTimes =
-      getMockOccupiedTimes(date);
-
-    const slots: TimeSlot[] = [];
-
-    const SLOT_INTERVAL = 30;
-
-    for (
-      let currentMinutes =
-        startMinutes;
-      currentMinutes +
-        serviceDurationMinutes <=
-      endMinutes;
-      currentMinutes +=
-      SLOT_INTERVAL
-    ) {
-      const time =
-        minutesToTime(
-          currentMinutes,
-        );
-
-      const occupied =
-        occupiedTimes.includes(
-          time,
-        );
-
-      slots.push({
-        time,
-        available:
-          !occupied &&
-          !isPastTime(
-            date,
-            time,
+        /*
+         * PostgreSQL normalmente devuelve TIME
+         * como:
+         *
+         * 09:30:00
+         *
+         * Nuestro frontend trabaja con:
+         *
+         * 09:30
+         */
+        time:
+          row.appointment_time.slice(
+            0,
+            5,
           ),
-      });
-    }
 
-    return slots;
+        duration:
+          row.appointment_duration,
+
+        status:
+          row.appointment_status as AppointmentStatus,
+      }),
+    );
   };
 
-export const createMockAppointment =
-  async (
-    input: CreateAppointmentInput,
-  ): Promise<CreatedAppointment> => {
-    await wait(700);
+/*
+ * ============================================================
+ * CREAR RESERVA PÚBLICA
+ * ============================================================
+ */
 
-    return {
-      id: crypto.randomUUID(),
-      ...input,
-    };
+/*
+ * La reserva NO inserta directamente en clients ni
+ * appointments.
+ *
+ * Toda la operación se delega a create_public_booking(),
+ * que se encarga de:
+ *
+ * 1. validar el servicio;
+ * 2. validar fecha y horario;
+ * 3. validar disponibilidad semanal;
+ * 4. validar blockedDates;
+ * 5. validar blockedPeriods;
+ * 6. comprobar superposición con otros turnos;
+ * 7. buscar o crear al cliente;
+ * 8. crear el appointment como PENDIENTE.
+ */
+export const createPublicBooking =
+  async ({
+    name,
+    phone,
+    comment,
+    serviceId,
+    date,
+    time,
+  }: CreatePublicBookingInput): Promise<number> => {
+    const { data, error } =
+      await supabase.rpc(
+        "create_public_booking",
+        {
+          p_name:
+            name.trim(),
+
+          p_phone:
+            phone.trim(),
+
+          p_service_id:
+            serviceId,
+
+          p_date:
+            date,
+
+          p_time:
+            time,
+
+          p_comment:
+            comment.trim(),
+        },
+      );
+
+    if (error) {
+      throw new Error(
+        error.message,
+      );
+    }
+
+    if (data === null) {
+      throw new Error(
+        "No se pudo crear la reserva.",
+      );
+    }
+
+    const appointmentId =
+      Number(data);
+
+    if (
+      !Number.isInteger(
+        appointmentId,
+      ) ||
+      appointmentId <= 0
+    ) {
+      throw new Error(
+        "La reserva fue procesada pero no se recibió un identificador válido.",
+      );
+    }
+
+    return appointmentId;
   };

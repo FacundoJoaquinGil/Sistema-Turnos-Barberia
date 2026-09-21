@@ -7,6 +7,7 @@ export const clientsMock: Client[] = [
     phone: "381 555-1201",
     notes: "Prefiere corte clásico.",
     createdAt: "2026-07-12",
+    updatedAt: "2026-07-12",
   },
   {
     id: 2,
@@ -14,6 +15,7 @@ export const clientsMock: Client[] = [
     phone: "381 555-1202",
     notes: "Suele reservar corte + barba.",
     createdAt: "2026-07-18",
+    updatedAt: "2026-07-18",
   },
   {
     id: 3,
@@ -21,6 +23,7 @@ export const clientsMock: Client[] = [
     phone: "381 555-1203",
     notes: "",
     createdAt: "2026-08-02",
+    updatedAt: "2026-08-02",
   },
   {
     id: 4,
@@ -28,6 +31,7 @@ export const clientsMock: Client[] = [
     phone: "381 555-1204",
     notes: "Cliente frecuente.",
     createdAt: "2026-08-10",
+    updatedAt: "2026-08-10",
   },
   {
     id: 5,
@@ -35,6 +39,7 @@ export const clientsMock: Client[] = [
     phone: "381 555-1205",
     notes: "",
     createdAt: "2026-08-15",
+    updatedAt: "2026-08-15",
   },
   {
     id: 6,
@@ -42,5 +47,6 @@ export const clientsMock: Client[] = [
     phone: "381 555-1206",
     notes: "",
     createdAt: "2026-08-25",
+    updatedAt: "2026-08-25",
   },
 ];

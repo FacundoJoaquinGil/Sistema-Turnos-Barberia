@@ -14,7 +14,6 @@ import {
   AdminClients,
   AdminDashboard,
   AdminLogin,
-  AdminPlaceholder,
   AdminServices,
   AdminStatistics,
 } from "../pages/admin";

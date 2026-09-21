@@ -10,6 +10,7 @@ export const servicesMock: Service[] = [
     price: 9000,
     isActive: true,
     createdAt: "2026-07-01",
+    updatedAt: "2026-07-01",
   },
   {
     id: 2,
@@ -20,6 +21,7 @@ export const servicesMock: Service[] = [
     price: 10000,
     isActive: true,
     createdAt: "2026-07-01",
+    updatedAt: "2026-07-01",
   },
   {
     id: 3,
@@ -30,6 +32,7 @@ export const servicesMock: Service[] = [
     price: 6000,
     isActive: true,
     createdAt: "2026-07-01",
+    updatedAt: "2026-07-01",
   },
   {
     id: 4,
@@ -40,5 +43,6 @@ export const servicesMock: Service[] = [
     price: 13000,
     isActive: true,
     createdAt: "2026-07-01",
+    updatedAt: "2026-07-01",
   },
 ];

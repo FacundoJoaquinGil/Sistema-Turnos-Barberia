@@ -1,4 +1,4 @@
-import type { Appointment } from "../types/appointment";
+import type { AppointmentStatus } from "../types/appointment";
 
 import type {
   BlockedPeriod,
@@ -6,18 +6,25 @@ import type {
   WeekDay,
 } from "../types/availability";
 
+type AvailabilityAppointment = {
+  id?: number;
+
+  date: string;
+  time: string;
+  duration: number;
+  status: AppointmentStatus;
+};
+
 interface GetAvailableSlotsParams {
   date: string;
-  duration: number;
+  serviceDuration: number;
+
   slotInterval: number;
-
   weeklySchedule: DayAvailability[];
-
   blockedDates: string[];
-
   blockedPeriods: BlockedPeriod[];
 
-  appointments: Appointment[];
+  appointments: AvailabilityAppointment[];
 
   excludeAppointmentId?: number;
 }
@@ -43,33 +50,37 @@ const timeToMinutes = (
 };
 
 const minutesToTime = (
-  minutes: number,
+  totalMinutes: number,
 ) => {
   const hours = Math.floor(
-    minutes / 60,
+    totalMinutes / 60,
   );
 
-  const mins = minutes % 60;
+  const minutes =
+    totalMinutes % 60;
 
   return `${String(hours).padStart(
     2,
     "0",
-  )}:${String(mins).padStart(2, "0")}`;
+  )}:${String(minutes).padStart(
+    2,
+    "0",
+  )}`;
 };
 
-const rangesOverlap = (
-  startA: number,
-  endA: number,
-  startB: number,
-  endB: number,
+const intervalsOverlap = (
+  firstStart: number,
+  firstEnd: number,
+  secondStart: number,
+  secondEnd: number,
 ) => {
   return (
-    startA < endB &&
-    endA > startB
+    firstStart < secondEnd &&
+    firstEnd > secondStart
   );
 };
 
-const formatDateKey = (
+const getLocalDateKey = (
   date: Date,
 ) => {
   const year = date.getFullYear();
@@ -87,9 +98,9 @@ const formatDateKey = (
 
 export const getAvailableSlots = ({
   date,
-  duration,
-  slotInterval,
+  serviceDuration,
   weeklySchedule,
+  slotInterval,
   blockedDates,
   blockedPeriods,
   appointments,
@@ -97,125 +108,146 @@ export const getAvailableSlots = ({
 }: GetAvailableSlotsParams) => {
   if (
     !date ||
-    duration <= 0
+    serviceDuration <= 0 ||
+    slotInterval <= 0
   ) {
     return [];
   }
 
+  /*
+   * 1. No permitir fechas anteriores
+   * al día actual.
+   */
   const now = new Date();
 
   const todayKey =
-    formatDateKey(now);
+    getLocalDateKey(now);
 
-  // No permitir turnos en fechas pasadas
   if (date < todayKey) {
     return [];
   }
 
-  // Día completamente bloqueado
+  /*
+   * 2. Si el día completo está
+   * bloqueado, no existen horarios.
+   */
   if (
     blockedDates.includes(date)
   ) {
     return [];
   }
 
-  const dateObject = new Date(
-    `${date}T00:00:00`,
-  );
+  /*
+   * Importante:
+   * T00:00 evita problemas de zona
+   * horaria al obtener getDay().
+   */
+  const selectedDate =
+    new Date(`${date}T00:00:00`);
 
   const weekDay =
-    weekDays[dateObject.getDay()];
+    weekDays[
+      selectedDate.getDay()
+    ];
 
-  const dayAvailability =
+  /*
+   * 3. Obtener el horario semanal
+   * correspondiente.
+   */
+  const daySchedule =
     weeklySchedule.find(
-      (item) =>
-        item.day === weekDay,
+      (day) =>
+        day.day === weekDay,
     );
 
   if (
-    !dayAvailability ||
-    !dayAvailability.isOpen
+    !daySchedule ||
+    !daySchedule.isOpen
   ) {
     return [];
   }
 
-  const openingMinutes =
+  const workStart =
     timeToMinutes(
-      dayAvailability.startTime,
+      daySchedule.startTime,
     );
 
-  const closingMinutes =
+  const workEnd =
     timeToMinutes(
-      dayAvailability.endTime,
+      daySchedule.endTime,
     );
 
-  const dayAppointments =
-    appointments.filter(
-      (appointment) =>
-        appointment.date === date &&
-        appointment.status !==
-          "CANCELADO" &&
-        appointment.id !==
-          excludeAppointmentId,
-    );
+  if (workStart >= workEnd) {
+    return [];
+  }
 
-  const dayBlockedPeriods =
+  /*
+   * 4. Bloqueos parciales
+   * únicamente de esta fecha.
+   */
+  const dateBlockedPeriods =
     blockedPeriods.filter(
       (period) =>
         period.date === date,
     );
 
+  /*
+   * 5. Turnos existentes de esta
+   * fecha.
+   *
+   * Los CANCELADO no ocupan lugar.
+   */
+  const dateAppointments =
+  appointments.filter(
+    (appointment) =>
+      appointment.date === date &&
+      appointment.status !==
+        "CANCELADO" &&
+      appointment.id !==
+        excludeAppointmentId,
+  );
+
   const availableSlots: string[] =
     [];
 
+  /*
+   * 6. Generar posibles horarios
+   * utilizando slotInterval.
+   */
   for (
-    let start = openingMinutes;
-    start + duration <=
-    closingMinutes;
-    start += slotInterval
+    let slotStart = workStart;
+    slotStart + serviceDuration <=
+    workEnd;
+    slotStart += slotInterval
   ) {
-    const end = start + duration;
+    const slotEnd =
+      slotStart +
+      serviceDuration;
 
-    // Evitar horarios pasados del día actual
+    /*
+     * 7. Si estamos viendo hoy,
+     * eliminar horarios que ya
+     * pasaron.
+     */
     if (date === todayKey) {
       const currentMinutes =
         now.getHours() * 60 +
         now.getMinutes();
 
-      if (start <= currentMinutes) {
+      if (
+        slotStart <=
+        currentMinutes
+      ) {
         continue;
       }
     }
 
-    const conflictsWithAppointment =
-      dayAppointments.some(
-        (appointment) => {
-          const appointmentStart =
-            timeToMinutes(
-              appointment.time,
-            );
-
-          const appointmentEnd =
-            appointmentStart +
-            appointment.duration;
-
-          return rangesOverlap(
-            start,
-            end,
-            appointmentStart,
-            appointmentEnd,
-          );
-        },
-      );
-
-    if (
-      conflictsWithAppointment
-    ) {
-      continue;
-    }
-
-    const conflictsWithBlockedPeriod =
-      dayBlockedPeriods.some(
+    /*
+     * 8. Verificar períodos
+     * bloqueados.
+     */
+    const overlapsBlockedPeriod =
+      dateBlockedPeriods.some(
         (period) => {
           const blockedStart =
             timeToMinutes(
@@ -227,9 +259,9 @@ export const getAvailableSlots = ({
               period.endTime,
             );
 
-          return rangesOverlap(
-            start,
-            end,
+          return intervalsOverlap(
+            slotStart,
+            slotEnd,
             blockedStart,
             blockedEnd,
           );
@@ -237,13 +269,46 @@ export const getAvailableSlots = ({
       );
 
     if (
-      conflictsWithBlockedPeriod
+      overlapsBlockedPeriod
+    ) {
+      continue;
+    }
+
+    /*
+     * 9. Verificar turnos ya
+     * existentes.
+     */
+    const overlapsAppointment =
+      dateAppointments.some(
+        (appointment) => {
+          const appointmentStart =
+            timeToMinutes(
+              appointment.time,
+            );
+
+          const appointmentEnd =
+            appointmentStart +
+            appointment.duration;
+
+          return intervalsOverlap(
+            slotStart,
+            slotEnd,
+            appointmentStart,
+            appointmentEnd,
+          );
+        },
+      );
+
+    if (
+      overlapsAppointment
     ) {
       continue;
     }
 
     availableSlots.push(
-      minutesToTime(start),
+      minutesToTime(
+        slotStart,
+      ),
     );
   }
 

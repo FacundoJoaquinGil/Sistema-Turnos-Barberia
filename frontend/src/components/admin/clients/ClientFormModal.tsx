@@ -6,9 +6,12 @@ import {
 } from "lucide-react";
 
 import {
-  FormEvent,
   useEffect,
   useState,
+} from "react";
+
+import type {
+  FormEvent,
 } from "react";
 
 import type {
