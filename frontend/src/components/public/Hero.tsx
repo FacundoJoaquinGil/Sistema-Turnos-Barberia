@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { barberShopMock } from "../../mocks/site.mock";
+import HaircutsCarousel from "./HaircutsCarousel";
 
 const Hero = () => {
   return (
@@ -95,23 +96,12 @@ const Hero = () => {
             <div className="absolute -top-4 -right-4 hidden h-full w-full rounded-[2rem] border border-zinc-300 lg:block" />
 
             <div className="relative overflow-hidden rounded-[1.75rem] bg-[var(--color-primary)] shadow-2xl shadow-zinc-900/20">
-              <img
-                src={barberShopMock.heroImage}
-                alt="Barbero realizando un corte de cabello"
-                className="aspect-[4/4.7] w-full object-cover sm:aspect-[4/4.3] lg:aspect-[4/5]"
-              />
+             
+             <HaircutsCarousel variant="hero" />
 
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-              <div className="absolute right-4 bottom-4 left-4 rounded-2xl border border-white/15 bg-black/35 p-4 text-white backdrop-blur-md sm:right-6 sm:bottom-6 sm:left-6 sm:p-5">
-                <p className="text-xs font-semibold tracking-[0.15em] text-zinc-300 uppercase">
-                  Distrito Barber
-                </p>
-
-                <p className="mt-1 text-lg font-semibold sm:text-xl">
-                  Encontrá el corte que va con vos.
-                </p>
-              </div>
+              
             </div>
 
             <div className="absolute -bottom-5 -left-3 hidden rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-xl sm:flex sm:items-center sm:gap-3 lg:-left-8">

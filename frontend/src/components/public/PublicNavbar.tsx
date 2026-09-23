@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 
+import aleLogo from "../../assets/images/ale-logo.png";
+
 interface NavItem {
   label: string;
   path: string;
@@ -14,10 +16,6 @@ const navItems: NavItem[] = [
   {
     label: "Servicios",
     path: "/#servicios",
-  },
-  {
-    label: "Trabajos",
-    path: "/#trabajos",
   },
   {
     label: "Contacto",
@@ -54,8 +52,8 @@ const PublicNavbar = () => {
     return [
       "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
       isActive
-        ? "bg-zinc-100 text-[var(--color-text)]"
-        : "text-[var(--color-text-secondary)] hover:bg-zinc-100 hover:text-[var(--color-text)]",
+        ? "bg-[var(--color-background)] text-[var(--color-text)]"
+        : "text-[var(--color-text-secondary)] hover:bg-[var(--color-background)] hover:text-[var(--color-text)]",
     ].join(" ");
   };
 
@@ -65,8 +63,8 @@ const PublicNavbar = () => {
     return [
       "rounded-xl px-4 py-3.5 text-base font-medium transition-colors",
       isActive
-        ? "bg-zinc-100 text-[var(--color-text)]"
-        : "text-[var(--color-text-secondary)] hover:bg-zinc-100 hover:text-[var(--color-text)]",
+        ? "bg-[var(--color-background)] text-[var(--color-text)]"
+        : "text-[var(--color-text-secondary)] hover:bg-[var(--color-background)] hover:text-[var(--color-text)]",
     ].join(" ");
   };
 
@@ -76,38 +74,18 @@ const PublicNavbar = () => {
         className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 lg:px-8"
         aria-label="Navegación principal"
       >
-        <Link
-          to="/"
-          className="flex items-center gap-3"
-          aria-label="Ir al inicio"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              className="h-5 w-5"
-              aria-hidden="true"
-            >
-              <path
-                d="m7 4 10 16M17 4 7 20M5.5 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5ZM18.5 15.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-
-          <div>
-            <p className="text-sm font-black tracking-[0.16em] text-[var(--color-text)] uppercase">
-              Distrito
-            </p>
-
-            <p className="-mt-0.5 text-[10px] font-medium tracking-[0.32em] text-zinc-500 uppercase">
-              Barber
-            </p>
+        {/* Logo */}
+        <Link to="/" className="flex items-center" aria-label="Ir al inicio">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[var(--color-secondary)] ">
+            <img
+              src={aleLogo}
+              alt="Ale Lopez Barbería"
+              className="h-full w-full object-contain"
+            />
           </div>
         </Link>
 
+        {/* Navegación escritorio */}
         <div className="hidden items-center gap-1 lg:flex">
           {navItems.map((item) => (
             <Link
@@ -120,10 +98,11 @@ const PublicNavbar = () => {
           ))}
         </div>
 
+        {/* Acciones escritorio */}
         <div className="hidden items-center gap-3 lg:flex">
           <Link
             to="/login"
-            className="px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:text-[var(--color-text)]"
+            className="px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text)]"
           >
             Ingresar
           </Link>
@@ -136,10 +115,11 @@ const PublicNavbar = () => {
           </Link>
         </div>
 
+        {/* Botón menú mobile */}
         <button
           type="button"
           onClick={() => setMenuOpen((current) => !current)}
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-secondary)] transition-colors hover:bg-zinc-100 lg:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-secondary)] transition-colors hover:bg-[var(--color-background)] lg:hidden"
           aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
           aria-expanded={menuOpen}
         >
@@ -175,6 +155,7 @@ const PublicNavbar = () => {
         </button>
       </nav>
 
+      {/* Menú mobile */}
       <div
         className={[
           "overflow-hidden border-[var(--color-border)] bg-white transition-all duration-300 lg:hidden",
@@ -194,18 +175,18 @@ const PublicNavbar = () => {
             </Link>
           ))}
 
-          <div className="my-3 h-px bg-zinc-200" />
+          <div className="my-3 h-px bg-[var(--color-border)]" />
 
           <Link
             to="/reservar"
-            className="flex min-h-12 items-center justify-center rounded-xl bg-[var(--color-primary)] px-5 py-3 font-semibold text-white transition-colors active:bg-zinc-800"
+            className="flex min-h-12 items-center justify-center rounded-xl bg-[var(--color-primary)] px-5 py-3 font-semibold text-white transition-colors hover:bg-[var(--color-primary-hover)]"
           >
             Reservar turno
           </Link>
 
           <Link
             to="/login"
-            className="flex min-h-12 items-center justify-center rounded-xl px-5 py-3 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-[var(--color-text)]"
+            className="flex min-h-12 items-center justify-center rounded-xl px-5 py-3 text-sm font-medium text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-background)] hover:text-[var(--color-text)]"
           >
             Acceso barbero
           </Link>

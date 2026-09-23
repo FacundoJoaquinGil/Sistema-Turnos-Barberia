@@ -1,29 +1,59 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-import { Link } from "react-router";
-import { haircutsMock } from "../../mocks/haircuts.mock";
+import { useEffect, useState } from "react";
 
-const HaircutsCarousel = () => {
-  const [activeIndex, setActiveIndex] =
-    useState(0);
+import corte1 from "../../assets/images/corte-1.jpeg";
+import corte2 from "../../assets/images/corte-2.jpeg";
+import corte3 from "../../assets/images/corte-3.jpeg";
+import corte4 from "../../assets/images/corte-4.jpeg";
+import corte6 from "../../assets/images/corte-6.jpeg";
 
-  const totalSlides = haircutsMock.length;
+type HaircutsCarouselProps = {
+  variant?: "section" | "hero";
+};
+
+const haircuts = [
+  {
+    id: 1,
+    image: corte1,
+    imageAlt: "Corte de cabello realizado en Distrito Barber",
+  },
+  {
+    id: 2,
+    image: corte2,
+    imageAlt: "Corte de cabello realizado en Distrito Barber",
+  },
+  {
+    id: 3,
+    image: corte3,
+    imageAlt: "Corte de cabello realizado en Distrito Barber",
+  },
+  {
+    id: 4,
+    image: corte4,
+    imageAlt: "Corte de cabello realizado en Distrito Barber",
+  },
+  {
+    id: 6,
+    image: corte6,
+    imageAlt: "Corte de cabello realizado en Distrito Barber",
+  },
+];
+
+const HaircutsCarousel = ({
+  variant = "section",
+}: HaircutsCarouselProps) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const totalSlides = haircuts.length;
 
   const showPrevious = () => {
     setActiveIndex((current) =>
-      current === 0
-        ? totalSlides - 1
-        : current - 1,
+      current === 0 ? totalSlides - 1 : current - 1,
     );
   };
 
   const showNext = () => {
     setActiveIndex((current) =>
-      current === totalSlides - 1
-        ? 0
-        : current + 1,
+      current === totalSlides - 1 ? 0 : current + 1,
     );
   };
 
@@ -32,58 +62,147 @@ const HaircutsCarousel = () => {
   };
 
   useEffect(() => {
-    const reducedMotion =
-      window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      );
+    if (totalSlides <= 1) return;
 
-    if (reducedMotion.matches) {
-      return;
-    }
-
-    const intervalId = window.setInterval(
-      () => {
-        setActiveIndex((current) =>
-          current === totalSlides - 1
-            ? 0
-            : current + 1,
-        );
-      },
-      5000,
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
     );
+
+    if (reducedMotion.matches) return;
+
+    const intervalId = window.setInterval(() => {
+      setActiveIndex((current) =>
+        current === totalSlides - 1 ? 0 : current + 1,
+      );
+    }, 5000);
 
     return () => {
       window.clearInterval(intervalId);
     };
   }, [totalSlides]);
 
+  /*
+   * ======================================================
+   * HERO
+   * ======================================================
+   */
+
+  if (variant === "hero") {
+    return (
+      <div
+        className="relative w-full overflow-hidden"
+        role="region"
+        aria-roledescription="carrusel"
+        aria-label="Trabajos realizados"
+      >
+        <div
+          className="flex transition-transform duration-500 ease-out"
+          style={{
+            transform: `translateX(-${activeIndex * 100}%)`,
+          }}
+        >
+          {haircuts.map((haircut, index) => (
+            <div
+              key={haircut.id}
+              className="min-w-full"
+              aria-hidden={activeIndex !== index}
+            >
+              <img
+                src={haircut.image}
+                alt={haircut.imageAlt}
+                className="aspect-[4/4.7] w-full object-cover sm:aspect-[4/4.3] lg:aspect-[4/5]"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Flecha izquierda */}
+        <button
+          type="button"
+          onClick={showPrevious}
+          className="absolute top-1/2 left-4 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-md transition-all hover:bg-black/50"
+          aria-label="Mostrar imagen anterior"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="h-5 w-5"
+            aria-hidden="true"
+          >
+            <path
+              d="m15 6-6 6 6 6"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
+        {/* Flecha derecha */}
+        <button
+          type="button"
+          onClick={showNext}
+          className="absolute top-1/2 right-4 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-md transition-all hover:bg-black/50"
+          aria-label="Mostrar siguiente imagen"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="h-5 w-5"
+            aria-hidden="true"
+          >
+            <path
+              d="m9 6 6 6-6 6"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
+        {/* Indicadores */}
+        <div
+          className="absolute right-0 bottom-5 left-0 z-20 flex items-center justify-center gap-2"
+          aria-label="Seleccionar imagen"
+        >
+          {haircuts.map((haircut, index) => (
+            <button
+              key={haircut.id}
+              type="button"
+              onClick={() => showSlide(index)}
+              className={[
+                "h-2 rounded-full transition-all duration-300",
+                activeIndex === index
+                  ? "w-7 bg-white"
+                  : "w-2 bg-white/40 hover:bg-white/70",
+              ].join(" ")}
+              aria-label={`Mostrar imagen ${index + 1}`}
+              aria-current={
+                activeIndex === index ? "true" : undefined
+              }
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  /*
+   * ======================================================
+   * SECCIÓN TRABAJOS
+   * ======================================================
+   */
+
   return (
     <section
       id="trabajos"
-      className="scroll-mt-24 overflow-hidden bg-[var(--color-primary)] py-20 text-white sm:py-24"
+      className="scroll-mt-24 overflow-hidden bg-[var(--color-primary)] py-20 sm:py-24"
     >
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
         <div
-          className="max-w-2xl"
-          data-aos="fade-up"
-        >
-          <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold tracking-[0.14em] text-zinc-300 uppercase">
-            Nuestros trabajos
-          </span>
-
-          <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">
-            Cortes que hablan por sí solos
-          </h2>
-
-          <p className="mt-5 max-w-xl text-base leading-7 text-zinc-400 sm:text-lg">
-            Algunos estilos que podés tomar como
-            referencia para encontrar el próximo
-            look que mejor vaya con vos.
-          </p>
-        </div>
-
-        <div
-          className="mt-12 overflow-hidden rounded-[1.75rem] border border-white/10 bg-[var(--color-primary)] shadow-2xl shadow-black/20"
+          className="overflow-hidden rounded-[1.75rem] shadow-2xl shadow-black/20"
           data-aos="fade-up"
           role="region"
           aria-roledescription="carrusel"
@@ -95,157 +214,90 @@ const HaircutsCarousel = () => {
               transform: `translateX(-${activeIndex * 100}%)`,
             }}
           >
-            {haircutsMock.map(
-              (haircut, index) => (
-                <article
-                  key={haircut.id}
-                  className="grid min-w-full lg:grid-cols-[1.4fr_0.6fr]"
-                  aria-hidden={
-                    activeIndex !== index
-                  }
-                >
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={haircut.image}
-                      alt={haircut.imageAlt}
-                      className="aspect-[4/5] h-full w-full object-cover sm:aspect-[16/10] lg:min-h-[560px] lg:aspect-auto"
-                    />
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent lg:hidden" />
-
-                    <span className="absolute top-5 left-5 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 text-xs font-semibold tracking-wide text-white backdrop-blur-md lg:hidden">
-                      {haircut.tag}
-                    </span>
-                  </div>
-
-                  <div className="flex min-h-[330px] flex-col justify-between p-6 sm:p-8 lg:min-h-[560px] lg:p-10">
-                    <div>
-                      <div className="hidden lg:block">
-                        <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold tracking-[0.12em] text-zinc-300 uppercase">
-                          {haircut.tag}
-                        </span>
-                      </div>
-
-                      <p className="mt-0 text-xs font-semibold tracking-[0.18em] text-zinc-500 uppercase lg:mt-8">
-                        Trabajo{" "}
-                        {String(index + 1).padStart(
-                          2,
-                          "0",
-                        )}
-                      </p>
-
-                      <h3 className="mt-3 text-3xl font-black tracking-tight text-white lg:text-4xl">
-                        {haircut.title}
-                      </h3>
-
-                      <p className="mt-5 max-w-md text-sm leading-7 text-zinc-400 sm:text-base">
-                        {haircut.description}
-                      </p>
-                    </div>
-
-                    <div>
-                      <div className="mb-7 flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={showPrevious}
-                          className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                          aria-label="Mostrar trabajo anterior"
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            className="h-5 w-5"
-                            aria-hidden="true"
-                          >
-                            <path
-                              d="m15 6-6 6 6 6"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={showNext}
-                          className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                          aria-label="Mostrar siguiente trabajo"
-                        >
-                          <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            className="h-5 w-5"
-                            aria-hidden="true"
-                          >
-                            <path
-                              d="m9 6 6 6-6 6"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-
-                      <Link
-                        to="/reservar"
-                        className="group inline-flex items-center gap-2 text-sm font-semibold text-white"
-                      >
-                        Quiero un corte así
-
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                          aria-hidden="true"
-                        >
-                          <path
-                            d="M5 12h14M13 6l6 6-6 6"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ),
-            )}
+            {haircuts.map((haircut, index) => (
+              <div
+                key={haircut.id}
+                className="min-w-full"
+                aria-hidden={activeIndex !== index}
+              >
+                <img
+                  src={haircut.image}
+                  alt={haircut.imageAlt}
+                  className="aspect-[4/5] w-full object-cover sm:aspect-[16/10] lg:max-h-[650px]"
+                />
+              </div>
+            ))}
           </div>
+
+          {/* Flecha izquierda */}
+          <button
+            type="button"
+            onClick={showPrevious}
+            className="absolute top-1/2 left-4 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-md transition-all hover:bg-black/50"
+            aria-label="Mostrar imagen anterior"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              className="h-5 w-5"
+              aria-hidden="true"
+            >
+              <path
+                d="m15 6-6 6 6 6"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+
+          {/* Flecha derecha */}
+          <button
+            type="button"
+            onClick={showNext}
+            className="absolute top-1/2 right-4 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-md transition-all hover:bg-black/50"
+            aria-label="Mostrar siguiente imagen"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              className="h-5 w-5"
+              aria-hidden="true"
+            >
+              <path
+                d="m9 6 6 6-6 6"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         </div>
 
+        {/* Indicadores */}
         <div
           className="mt-7 flex items-center justify-center gap-2"
-          aria-label="Seleccionar trabajo"
+          aria-label="Seleccionar imagen"
         >
-          {haircutsMock.map(
-            (haircut, index) => (
-              <button
-                key={haircut.id}
-                type="button"
-                onClick={() =>
-                  showSlide(index)
-                }
-                className={[
-                  "h-2.5 rounded-full transition-all duration-300",
-                  activeIndex === index
-                    ? "w-8 bg-white"
-                    : "w-2.5 bg-zinc-700 hover:bg-zinc-500",
-                ].join(" ")}
-                aria-label={`Mostrar ${haircut.title}`}
-                aria-current={
-                  activeIndex === index
-                    ? "true"
-                    : undefined
-                }
-              />
-            ),
-          )}
+          {haircuts.map((haircut, index) => (
+            <button
+              key={haircut.id}
+              type="button"
+              onClick={() => showSlide(index)}
+              className={[
+                "h-2.5 rounded-full transition-all duration-300",
+                activeIndex === index
+                  ? "w-8 bg-white"
+                  : "w-2.5 bg-white/30 hover:bg-white/50",
+              ].join(" ")}
+              aria-label={`Mostrar imagen ${index + 1}`}
+              aria-current={
+                activeIndex === index ? "true" : undefined
+              }
+            />
+          ))}
         </div>
       </div>
     </section>
